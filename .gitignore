@@ -1,0 +1,9 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+TestResults/
+mocks/*.mp4
+mocks/*.mp3
+mocks/*.m4a
