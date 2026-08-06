@@ -1,4 +1,4 @@
-# interview-prep
+# PROGPREP
 
 **Maqsad:** Middle+ / Senior .NET backend — **mahalliy fintech** (Payme, Click, Uzum, banklar). 12 hafta.
 
