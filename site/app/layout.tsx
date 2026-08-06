@@ -19,7 +19,8 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "InterviewPrep — intervyuga tayyorgarlik",
+  // Yorliqda qisqa nom turadi — sahifa nomi uzun bo'lsa kesilib ketadi.
+  title: "PROGPREP",
   description:
     "Backend intervyusida so'raladigan mavzular: chizma, kod va tayyor javoblar.",
 };
