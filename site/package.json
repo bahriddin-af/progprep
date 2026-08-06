@@ -1,0 +1,30 @@
+{
+  "name": "interview-prep-site",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "content": "node scripts/build-content.mjs",
+    "dev": "npm run content && next dev",
+    "build": "npm run content && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "next": "^16.3.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "zod": "3.24.1",
+    "zustand": "5.0.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "22.10.7",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "tailwindcss": "^4.3.3",
+    "typescript": "5.7.3",
+    "vitest": "3.0.4"
+  }
+}
