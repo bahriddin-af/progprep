@@ -12,7 +12,10 @@ export default async function TopicDrawerRoute({
   params: Promise<{ slug: string; topicId: string }>;
 }) {
   const { slug, topicId } = await params;
-  const { stage, topic, basePath, prevHref, nextHref } = resolveTopic(slug, topicId);
+  const { stage, topic, basePath, prevHref, nextHref, locked } = resolveTopic(
+    slug,
+    topicId,
+  );
 
   return (
     <TopicDrawer
@@ -21,6 +24,7 @@ export default async function TopicDrawerRoute({
       closeHref={basePath}
       prevHref={prevHref}
       nextHref={nextHref}
+      locked={locked}
     />
   );
 }

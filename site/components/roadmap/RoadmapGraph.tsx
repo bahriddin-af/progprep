@@ -1,6 +1,8 @@
-import Link from "next/link";
 import type { Stage, Topic } from "@/content/schema";
 import { buildSpine, type SpineNode } from "@/lib/graph";
+import { freeTopicIds } from "@/lib/access";
+import { TopicLink } from "./TopicLink";
+import { LockMark } from "@/components/auth/SignInGate";
 import { StatusDot } from "./StatusDot";
 import { TickMeter } from "./TickMeter";
 
@@ -16,6 +18,7 @@ export function RoadmapGraph({
   basePath: string;
 }) {
   const spine = buildSpine(stages.map((s) => ({ id: s.id, topics: s.topics })));
+  const free = new Set(freeTopicIds(stages));
 
   const stageById = new Map(stages.map((s) => [s.id, s]));
   const topicById = new Map<string, { topic: Topic; stage: Stage; index: number }>();
@@ -89,10 +92,18 @@ export function RoadmapGraph({
 
           return (
             <div key={n.id} className="absolute" style={nodeStyle(n)}>
-              <Link
+              <TopicLink
                 href={`${basePath}/topic/${topic.id}`}
+                locked={!free.has(topic.id)}
+                title={topic.title}
+                lockedClassName="opacity-55"
+                lockSlot={
+                  <span className="shrink-0 text-[var(--color-ink-3)]">
+                    <LockMark />
+                  </span>
+                }
                 className={
-                  "flex h-full items-center gap-2.5 border border-[var(--color-line-2)] bg-[var(--color-paper)] transition-colors hover:border-[var(--color-ink)] hover:bg-[var(--color-paper-2)] " +
+                  "flex h-full w-full items-center gap-2.5 border border-[var(--color-line-2)] bg-[var(--color-paper)] transition-colors hover:border-[var(--color-ink)] hover:bg-[var(--color-paper-2)] " +
                   (outerRight ? "pl-3 pr-8" : "pl-8 pr-3")
                 }
               >
@@ -110,7 +121,7 @@ export function RoadmapGraph({
                     style={{ background: "var(--color-hot)" }}
                   />
                 )}
-              </Link>
+              </TopicLink>
 
               {/* Havola ichida tugma bo'lmaydi — qirrada alohida turadi */}
               <span

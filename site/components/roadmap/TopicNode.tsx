@@ -1,20 +1,31 @@
-import Link from "next/link";
 import type { Topic } from "@/content/schema";
 import { StatusMark } from "./StatusMark";
+import { TopicLink } from "./TopicLink";
+import { LockMark } from "@/components/auth/SignInGate";
 
 export function TopicNode({
   topic,
   href,
   index,
+  locked,
 }: {
   topic: Topic;
   href: string;
   index: string;
+  locked: boolean;
 }) {
   return (
-    <Link
+    <TopicLink
       href={href}
-      className="group relative flex min-h-[74px] flex-col justify-between px-4 py-3 transition-colors hover:bg-[var(--color-paper-2)]"
+      locked={locked}
+      title={topic.title}
+      lockedClassName="opacity-60"
+      lockSlot={
+        <span className="absolute right-4 top-3 text-[var(--color-ink-3)]">
+          <LockMark />
+        </span>
+      }
+      className="group relative flex min-h-[74px] w-full flex-col justify-between px-4 py-3 transition-colors hover:bg-[var(--color-paper-2)]"
     >
       <div className="flex items-start gap-2.5">
         <span className="mono mt-[1px] shrink-0 text-[11px] text-[var(--color-ink-3)]">
@@ -36,6 +47,6 @@ export function TopicNode({
       <div className="mt-2 flex items-center gap-2 pl-[26px]">
         <StatusMark topicId={topic.id} />
       </div>
-    </Link>
+    </TopicLink>
   );
 }

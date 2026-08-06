@@ -4,6 +4,7 @@ import { StageSection } from "@/components/roadmap/StageSection";
 import { RoadmapGraph } from "@/components/roadmap/RoadmapGraph";
 import { Legend } from "@/components/roadmap/Legend";
 import { CANVAS_W } from "@/lib/graph";
+import { freeTopicIds } from "@/lib/access";
 
 export function generateStaticParams() {
   return allRoadmaps.map((r) => ({ slug: r.slug }));
@@ -19,6 +20,7 @@ export default async function RoadmapPage({
   if (!roadmap) notFound();
 
   const t = totals(roadmap);
+  const freeIds = new Set(freeTopicIds(roadmap.stages));
 
   const stats = (
     <p className="mono flex flex-wrap items-center justify-center gap-x-2 text-[12px] text-[var(--color-ink-3)]">
@@ -53,17 +55,22 @@ export default async function RoadmapPage({
           xarita kengligiga tekislanadi, shunda ular diagrammaning bir qismi
           bo'lib ko'rinadi — ustida suzib turgan quti emas. */}
       <div className="hidden py-10 lg:block">
+        {/* Bosh sahifadagi hero bilan bir xil tuzilma: chapda da'vo,
+            o'ngda raqamlar varaqasi. */}
         <div
-          className="mx-auto flex items-end justify-between gap-10"
-          style={{ width: CANVAS_W }}
+          className="mx-auto grid items-start gap-14"
+          style={{ width: CANVAS_W, gridTemplateColumns: "1fr 380px" }}
         >
           <div>
-            <p className="label">Roadmap</p>
-            <h1 className="mt-2 text-[2.6rem] font-bold leading-[1.05] tracking-[-0.03em]">
+            <h1 className="max-w-[13ch] text-balance text-[clamp(2.4rem,4.4vw,3.6rem)] font-bold leading-[0.98] tracking-[-0.035em]">
               {roadmap.title}
             </h1>
-            <div className="mt-3 [&_p]:justify-start">{stats}</div>
+            <p className="mt-6 max-w-[46ch] text-[16px] leading-relaxed text-[var(--color-ink-2)]">
+              {roadmap.description}
+            </p>
+            <div className="mt-6 [&_p]:justify-start">{stats}</div>
           </div>
+
           <Legend />
         </div>
 
@@ -86,6 +93,7 @@ export default async function RoadmapPage({
             key={stage.id}
             stage={stage}
             basePath={`/roadmaps/${roadmap.slug}`}
+            freeIds={freeIds}
           />
         ))}
       </div>

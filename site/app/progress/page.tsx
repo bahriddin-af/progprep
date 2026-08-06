@@ -11,11 +11,8 @@ export default function ProgressPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-[900px] px-6 py-12">
+    <div className="mx-auto max-w-[1116px] px-6 py-12">
       <h1 className="text-balance text-[clamp(1.9rem,4vw,2.6rem)] font-bold tracking-[-0.03em]">Progress</h1>
-      <p className="mono mt-2 text-[12px] text-[var(--color-ink-3)]">
-        Brauzeringizda saqlanadi. Server hisobi hali ulanmagan.
-      </p>
       <div className="mt-8">
         <ProgressReport stages={stages} slug={roadmap.slug} />
       </div>

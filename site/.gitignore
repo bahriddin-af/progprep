@@ -3,3 +3,8 @@ node_modules/
 out/
 *.tsbuildinfo
 next-env.d.ts
+
+# Maxfiy kalitlar
+.env
+.env.local
+.env*.local

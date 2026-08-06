@@ -20,9 +20,12 @@ const FILL: Record<Status, string> = {
 export function TickMeter({
   topicIds,
   height = 14,
+  fill = false,
 }: {
   topicIds: string[];
   height?: number;
+  /** Mavjud kenglikni to'liq egallaydi — tiklar cho'ziladi. */
+  fill?: boolean;
 }) {
   const progress = useProgress((s) => s.progress);
   const done = topicIds.filter((id) => {
@@ -31,9 +34,9 @@ export function TickMeter({
   }).length;
 
   return (
-    <div className="flex items-center gap-2.5">
+    <div className={"flex items-center gap-2.5" + (fill ? " w-full" : "")}>
       <div
-        className="flex gap-[2px]"
+        className={"flex gap-[2px]" + (fill ? " min-w-0 flex-1" : "")}
         role="img"
         aria-label={`${topicIds.length} mavzudan ${done} tasi yopilgan`}
       >
@@ -43,7 +46,7 @@ export function TickMeter({
             <span
               key={id}
               title={STATUS_LABEL[status]}
-              className="w-[3px] shrink-0"
+              className={fill ? "min-w-[1px] flex-1" : "w-[3px] shrink-0"}
               style={{ height, background: FILL[status] }}
             />
           );

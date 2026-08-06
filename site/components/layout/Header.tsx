@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
+import { AuthButton } from "@/components/auth/AuthButton";
 
 export function Header() {
   return (
@@ -14,7 +15,8 @@ export function Header() {
           <NavLink href="/progress">Progress</NavLink>
         </nav>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-3">
+          <AuthButton />
           <ThemeToggle />
         </div>
       </div>

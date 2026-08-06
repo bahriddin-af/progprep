@@ -64,8 +64,8 @@ export function ProgressReport({
           </dl>
         </div>
 
-        <div className="overflow-x-auto border-t border-[var(--color-line-2)] p-5">
-          <TickMeter topicIds={all} height={22} />
+        <div className="border-t border-[var(--color-line-2)] p-5">
+          <TickMeter topicIds={all} height={22} fill />
         </div>
       </div>
 
@@ -85,16 +85,16 @@ export function ProgressReport({
           <li key={s.id} className="border-b border-[var(--color-line-2)]">
             <Link
               href={`/roadmaps/${slug}#${s.slug}`}
-              className="flex flex-wrap items-center gap-x-5 gap-y-2 py-3.5 hover:bg-[var(--color-paper-2)]"
+              className="flex flex-wrap items-center gap-x-5 gap-y-2 py-4 hover:bg-[var(--color-paper-2)]"
             >
               <span className="mono w-7 shrink-0 text-[12px] text-[var(--color-ink-3)]">
                 {String(s.order).padStart(2, "0")}
               </span>
-              <span className="min-w-0 flex-1 truncate text-[14px] font-semibold">
+              <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">
                 {s.title}
               </span>
               <span className="shrink-0">
-                <TickMeter topicIds={s.topicIds} height={12} />
+                <TickMeter topicIds={s.topicIds} height={14} />
               </span>
             </Link>
           </li>

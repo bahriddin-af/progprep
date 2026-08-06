@@ -5,9 +5,11 @@ import { TickMeter } from "./TickMeter";
 export function StageSection({
   stage,
   basePath,
+  freeIds,
 }: {
   stage: Stage;
   basePath: string;
+  freeIds: Set<string>;
 }) {
   const topicIds = stage.topics.map((t) => t.id);
   const num = String(stage.order).padStart(2, "0");
@@ -39,6 +41,7 @@ export function StageSection({
             topic={topic}
             index={`${num}.${String(i + 1).padStart(2, "0")}`}
             href={`${basePath}/topic/${topic.id}`}
+            locked={!freeIds.has(topic.id)}
           />
         ))}
       </div>

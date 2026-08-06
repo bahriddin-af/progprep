@@ -13,7 +13,10 @@ export default async function TopicPage({
   params: Promise<{ slug: string; topicId: string }>;
 }) {
   const { slug, topicId } = await params;
-  const { stage, topic, basePath, prevHref, nextHref } = resolveTopic(slug, topicId);
+  const { stage, topic, basePath, prevHref, nextHref, locked } = resolveTopic(
+    slug,
+    topicId,
+  );
 
   return (
     <div className="mx-auto max-w-[74ch] px-6 py-10">
@@ -37,7 +40,7 @@ export default async function TopicPage({
       </h1>
 
       <div className="mt-6 border-t border-[var(--color-line)] pt-6">
-        <TopicBody topic={topic} />
+        <TopicBody topic={topic} locked={locked} />
       </div>
 
       <nav className="mt-16 flex gap-2 border-t border-[var(--color-line)] pt-4">

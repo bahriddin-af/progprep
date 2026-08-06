@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { allRoadmaps, getRoadmap, findTopic, neighbours } from "@/lib/content";
+import { isFreeTopic } from "@/lib/access";
 
 export function allTopicParams() {
   return allRoadmaps.flatMap((r) =>
@@ -24,5 +25,7 @@ export function resolveTopic(slug: string, topicId: string) {
     topic: found.topic,
     prevHref: nb.prev ? `${basePath}/topic/${nb.prev.id}` : undefined,
     nextHref: nb.next ? `${basePath}/topic/${nb.next.id}` : undefined,
+    // Kirmagan foydalanuvchi uchun yopiqmi. Yakuniy qarorni klient chiqaradi.
+    locked: !isFreeTopic(roadmap.stages, topicId),
   };
 }
