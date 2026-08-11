@@ -40,7 +40,7 @@ export function TopicBody({ topic, locked }: { topic: Topic; locked: boolean }) 
   return (
     <>
       {/* Qisqacha mazmun qulfdan tashqarida — odam nima olishini ko'rsin. */}
-      <p className="max-w-[68ch] text-[15px] leading-relaxed text-[var(--color-ink-2)]">
+      <p className="text-[15px] leading-relaxed text-[var(--color-ink-2)]">
         {topic.summary}
       </p>
 

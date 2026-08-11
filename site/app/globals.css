@@ -188,11 +188,10 @@ body {
 .lesson > * + * {
   margin-top: 1.35rem;
 }
-/* Matn tor ustunda qoladi — jadval va chizma esa butun kenglikni oladi */
-.lesson p,
-.lesson li {
-  max-width: 68ch;
-}
+/* Matnga alohida cheklov YO'Q — ilgari 68ch edi va matn jadvaldan ~220px
+   kalta tugardi. Satr uzunligini endi konteynerning o'zi belgilaydi
+   (topic sahifasi va drawer: 720px), shunda matn, jadval va chizma
+   bir xil kenglikda tugaydi. */
 .lesson b {
   color: var(--color-ink);
   font-weight: 650;
