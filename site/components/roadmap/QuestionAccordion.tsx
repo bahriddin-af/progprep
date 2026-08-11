@@ -30,7 +30,7 @@ export function QuestionAccordion({ questions }: { questions: Question[] }) {
             </button>
             {expanded && (
               <div
-                className="lesson pb-4 pl-[26px] pr-2"
+                className="lesson pb-4 pl-[26px] pr-6"
                 dangerouslySetInnerHTML={{ __html: q.answer }}
               />
             )}

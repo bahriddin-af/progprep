@@ -246,6 +246,11 @@ body {
   border-left: 3px solid var(--color-ink);
   padding: 1.1rem 1.25rem;
   overflow-x: auto;
+  /* Ramka matn ustunidan tashqariga chiqadi — shunda kod harflari paragraf
+     harflari bilan AYNAN bir vertikalda turadi. Padding qancha bo'lsa,
+     manfiy margin ham shuncha. */
+  margin-left: calc(-1.25rem - 3px);
+  margin-right: -1.25rem;
 }
 .lesson pre b {
   font-weight: 700;
@@ -287,6 +292,8 @@ body {
   border: 1px solid var(--color-line-2);
   border-left: 1px solid var(--color-line-2);
   padding: 1.25rem;
+  margin-left: calc(-1.25rem - 1px);
+  margin-right: calc(-1.25rem - 1px);
 }
 .lesson pre.dg b {
   color: var(--color-ink);
@@ -303,6 +310,9 @@ body {
   font-size: 0.875rem;
   line-height: 1.55;
   border: 1px solid var(--color-line-2);
+  /* Yacheyka padding'i (0.9rem) + ramka — jadval matni paragraf bilan tekis */
+  margin-left: calc(-0.9rem - 1px);
+  margin-right: calc(-0.9rem - 1px);
 }
 .lesson thead,
 .lesson tbody,
@@ -362,6 +372,7 @@ body {
   font-size: 0.9375rem;
   line-height: 1.7;
   padding: 0.35rem 0 0.35rem 1.15rem;
+  margin-left: calc(-1.15rem - 3px);
   border-left: 3px solid var(--color-line-2);
   color: var(--color-ink-2);
 }
@@ -490,6 +501,8 @@ body {
   border: 1px solid var(--color-line-2);
   padding: 0.75rem;
   overflow-x: auto;
+  margin-left: calc(-0.75rem - 1px);
+  margin-right: calc(-0.75rem - 1px);
 }
 .lesson figure.d2 img {
   display: block;
@@ -533,4 +546,18 @@ body {
 }
 :root[data-theme="light"] .lesson figure.d2 .d2-dark {
   display: none;
+}
+
+/* Tor ekranda konteyner padding'i atigi 24px — bloklar tashqariga chiqsa
+   ramka ekran qirrasiga tegib ketadi. Shuning uchun telefonda "bleed" yo'q. */
+@media (max-width: 639px) {
+  .lesson pre,
+  .lesson pre.dg,
+  .lesson table,
+  .lesson figure.d2,
+  .lesson .warn,
+  .lesson .tip {
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
