@@ -19,7 +19,7 @@ export default async function TopicPage({
   );
 
   return (
-    <div className="mx-auto max-w-[720px] px-6 py-10 sm:px-10">
+    <div className="mx-auto max-w-[1060px] px-6 py-10 sm:px-10">
       <Link
         href={basePath}
         className="mono text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-3)] underline-offset-4 hover:text-[var(--color-ink)] hover:underline"

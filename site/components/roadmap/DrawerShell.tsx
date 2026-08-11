@@ -96,11 +96,11 @@ export function DrawerShell({
         ref={panelRef}
         className={
           "relative flex h-full flex-col border-l-2 border-[var(--color-line)] bg-[var(--color-paper)] " +
-          (narrow ? "w-full max-w-[920px]" : "w-full")
+          (narrow ? "w-full max-w-[1140px]" : "w-full")
         }
       >
         <div className="shrink-0 border-b border-[var(--color-line)] px-6 py-4 sm:px-10">
-          <div className="mx-auto flex w-full max-w-[720px] items-start gap-4">
+          <div className="mx-auto flex w-full max-w-[1060px] items-start gap-4">
             <div className="min-w-0 flex-1">
               <p className="mono truncate text-[11px] uppercase tracking-[0.14em] text-[var(--color-ink-3)]">
                 {stageNo} · {stageTitle}
@@ -142,11 +142,11 @@ export function DrawerShell({
 
         {/* Markazlashtirilgan o'qish ustuni — matn ekran chetiga yopishmaydi. */}
         <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-8 sm:px-10">
-          <div className="mx-auto w-full max-w-[720px] pb-28">{children}</div>
+          <div className="mx-auto w-full max-w-[1060px] pb-28">{children}</div>
         </div>
 
         <div className="shrink-0 border-t border-[var(--color-line)] px-6 py-3 sm:px-10">
-          <div className="mx-auto flex w-full max-w-[720px] items-center gap-2">
+          <div className="mx-auto flex w-full max-w-[1060px] items-center gap-2">
             <NavButton href={prevHref} label="← oldingi" />
             <NavButton href={nextHref} label="keyingi →" className="ml-auto" />
           </div>
