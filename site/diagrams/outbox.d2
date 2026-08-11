@@ -1,0 +1,45 @@
+# Transactional Outbox — dual write muammosining standart yechimi.
+# Chizma isbotlamoqchi bo'lgan narsa: brokerga yozish tranzaksiya ICHIDA emas,
+# shuning uchun "DB commit bo'ldi-yu, xabar ketmadi" holati mumkin emas.
+
+direction: down
+
+tx: BITTA TRANZAKSIYA {
+  style.stroke-dash: 4
+  style.bold: true
+
+  payments: "INSERT INTO payments" {
+    shape: rectangle
+  }
+  outbox: "INSERT INTO outbox" {
+    shape: rectangle
+    style.bold: true
+  }
+  payments -> outbox: COMMIT birga
+}
+
+relay: "Relay — fon vazifasi\nhar 1 soniya" {
+  shape: rectangle
+  style.stroke-dash: 3
+}
+
+query: "SELECT ... WHERE published_at IS NULL\nFOR UPDATE SKIP LOCKED LIMIT 100" {
+  shape: rectangle
+  style.font-size: 13
+}
+
+broker: Broker {
+  shape: queue
+}
+
+mark: "published_at = now()" {
+  shape: rectangle
+}
+
+tx.outbox -> relay: 1. yozuv kutadi
+relay -> query: 2. o'qiydi
+query -> broker: 3. yuboradi
+broker -> mark: 4. belgilaydi
+mark -> query: takror o'qilmasin {
+  style.stroke-dash: 3
+}

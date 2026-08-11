@@ -26,6 +26,46 @@ const stages = new Function(`return ${source}`)();
 
 // ---- 2. Normallashtirish ----------------------------------------------------
 
+/**
+ * Chizmani koddan ajratadi.
+ *
+ * Ikkalasi ham <pre> ichida keladi, lekin talabi qarama-qarshi: kod o'qishga
+ * qulay bo'lishi uchun keng qatorlararo masofa istaydi, quti chizmasi esa
+ * vertikal chiziqlari uzilmasligi uchun zich bo'lishi shart. Shuning uchun
+ * build vaqtida belgilab qo'yamiz — CSS keyin ikkisini boshqacha bezaydi.
+ */
+const BOX_CHARS = /[┌┐└┘├┤┬┴┼─│═║╔╗╚╝▲▼◄►]/;
+
+/**
+ * <div data-d2="nom">izoh</div> → D2 chizmasi.
+ *
+ * Ikki tema uchun ikki rasm qo'yiladi, kerakligini CSS tanlaydi. `alt` esa
+ * izohdan olinadi — ekran o'qigich uchun chizma jim qolmasin.
+ */
+function embedDiagrams(html) {
+  return html.replace(
+    /<div data-d2="([\w-]+)"[^>]*>([\s\S]*?)<\/div>/g,
+    (_whole, name, note) => {
+      const clean = note.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+      const alt = clean.replace(/"/g, "&quot;");
+      return (
+        `<figure class="d2">` +
+        `<img class="d2-light" src="/diagrams/${name}.light.svg" alt="${alt}" loading="lazy">` +
+        `<img class="d2-dark" src="/diagrams/${name}.dark.svg" alt="${alt}" loading="lazy">` +
+        (clean ? `<figcaption>${note.trim()}</figcaption>` : "") +
+        `</figure>`
+      );
+    },
+  );
+}
+
+function markDiagrams(html) {
+  return html.replace(/<pre>([\s\S]*?)<\/pre>/g, (whole, body) =>
+    BOX_CHARS.test(body) ? `<pre class="dg">${body}</pre>` : whole,
+  );
+}
+
+
 const slugify = (s) =>
   s
     .toLowerCase()
@@ -50,11 +90,11 @@ const roadmap = {
       title: t.title,
       summary: t.summary ?? "",
       hot: t.hot === true,
-      lesson: (t.lesson ?? "").trim(),
+      lesson: embedDiagrams(markDiagrams((t.lesson ?? "").trim())),
       questions: (t.questions ?? []).map((q, k) => ({
         id: `${t.id}-q${k + 1}`,
         question: q.q,
-        answer: (q.a ?? "").trim(),
+        answer: embedDiagrams(markDiagrams((q.a ?? "").trim())),
       })),
     })),
   })),

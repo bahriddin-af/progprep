@@ -1,0 +1,34 @@
+# Dictionary qidiruvi. Chizma isbotlamoqchi: GetHashCode noto'g'ri bo'lsa,
+# Equals umuman chaqirilmaydi — element "yo'qolgandek" ko'rinadi.
+
+direction: down
+
+hash: "1. hash = key.GetHashCode()" {
+  shape: rectangle
+}
+bucket: "2. bucket = hash % bucketCount" {
+  shape: rectangle
+}
+chain: "bucket 3:\n[entry] → [entry]  (kolliziya zanjiri)" {
+  shape: rectangle
+}
+eq: "3. key.Equals(entry.Key)" {
+  shape: rectangle
+}
+found: topildi {
+  shape: rectangle
+  style.bold: true
+}
+lost: "TOPILMADI\nelement \"yo'qoldi\"" {
+  shape: rectangle
+  style.stroke-dash: 3
+}
+
+hash -> bucket
+bucket -> chain
+chain -> eq
+eq -> found: mos keldi
+hash -> lost: "hash boshqa bo'lsa —\nboshqa bucket, Equals\numuman chaqirilmaydi" {
+  style.stroke-dash: 4
+  style.bold: true
+}

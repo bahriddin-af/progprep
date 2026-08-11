@@ -1,0 +1,35 @@
+# Tur tanlash daraxti. Har barg — amaliy tanlov, ostida uning narxi.
+
+direction: down
+
+root: TUR TANLASH {
+  shape: diamond
+}
+
+val: "VALUE TYPE\nstack yoki obyekt ichida" {
+  shape: rectangle
+}
+ref: "REFERENCE TYPE\nheap'da" {
+  shape: rectangle
+}
+
+st: "struct\nmutable, Equals qo'lda" {
+  shape: rectangle
+}
+rs: "record struct\nqiymat tengligi, with" {
+  shape: rectangle
+  style.bold: true
+}
+cl: "class\nhavola tengligi" {
+  shape: rectangle
+}
+rc: "record class\nqiymat tengligi, with" {
+  shape: rectangle
+}
+
+root -> val
+root -> ref
+val -> st
+val -> rs
+ref -> cl
+ref -> rc

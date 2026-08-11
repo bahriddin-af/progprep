@@ -1,0 +1,26 @@
+# string o'zgarmas: s += " Vali" eski satrni tahrirlamaydi, YANGI obyekt yaratadi.
+
+direction: right
+
+old: "\"Ali\"\neski obyekt" {
+  shape: rectangle
+  style.stroke-dash: 4
+}
+
+new: "\"Ali Vali\"\nYANGI obyekt" {
+  shape: rectangle
+  style.bold: true
+}
+
+s: "s o'zgaruvchisi" {
+  shape: rectangle
+}
+
+gc: "GC yig'adi" {
+  shape: rectangle
+  style.stroke-dash: 3
+}
+
+s -> new: "s += \" Vali\" dan keyin\nshu yerni ko'rsatadi"
+old -> new: "nusxa + qo'shimcha"
+old -> gc: "hech kim ishlatmaydi"

@@ -10,6 +10,15 @@ public static class StringCompression
 {
     public static int Solve(char[] chars)
     {
-        throw new NotImplementedException();
+        Dictionary<char, int> dict = new Dictionary<char, int>();
+        foreach (char c in chars)
+        {
+            if (dict.ContainsKey(c))
+                dict[c]++;
+            else
+                dict[c] = 1;
+        }
+
+        return dict.Count() * 2;
     }
 }

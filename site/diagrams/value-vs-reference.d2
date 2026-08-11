@@ -1,0 +1,37 @@
+# OLDIN → KEYIN. Bitta amal: nusxa olib, nusxaning maydonini o'zgartirish.
+# Isbot: struct'da asl qiymat tegilmay qoladi, class'da esa o'zgaradi.
+
+direction: right
+
+oldin: "OLDIN" {
+  a: "a\n{ X: 1 }" {
+    shape: rectangle
+  }
+  c: "c" {
+    shape: rectangle
+  }
+  obj: "obyekt\n{ X: 1 }" {
+    shape: rectangle
+  }
+  c -> obj
+}
+
+keyin: "KEYIN — nusxa olindi, nusxaga 99 yozildi" {
+  a2: "a\n{ X: 1 }  ← tegilmadi" {
+    shape: rectangle
+    style.bold: true
+  }
+  b2: "b\n{ X: 99 }" {
+    shape: rectangle
+  }
+  cd: "c va d" {
+    shape: rectangle
+  }
+  obj2: "obyekt\n{ X: 99 }  ← ikkalasiga ham" {
+    shape: rectangle
+    style.bold: true
+  }
+  cd -> obj2
+}
+
+oldin -> keyin: "b = a; b.X = 99\nd = c; d.X = 99"

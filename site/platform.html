@@ -323,52 +323,66 @@ const DATA = [
     id:"m1-1", title:"Value vs reference type", hot:true,
     summary:"Nusxalash semantikasi, stack/heap haqiqati va boxing. Birinchi savol.",
     lesson:`
+      <p>Value type o'zgaruvchisi <b>qiymatning o'zini</b> saqlaydi, reference type
+      o'zgaruvchisi <b>obyektga havolani</b>. O'zlashtirishda va metodga uzatishda
+      o'zgaruvchi qiymati ko'chiriladi — value type uchun bu butun tuzilmaning nusxasi.</p>
+      <ul>
+        <li><code>null</code> — «havola yo'q» degani, shuning uchun value type'ga
+        yozib bo'lmaydi; buning uchun <code>T?</code> bor.</li>
+        <li><b>Boxing</b> — value type <code>object</code> ga yoki interfeysga o'tkazilishi.
+        CLR qiymatni heap'dagi obyekt ichiga ko'chiradi.</li>
+        <li>Struct ichida reference maydon bo'lsa, nusxada faqat havola ko'chadi —
+        ikkalasi bitta obyektga tegadi.</li>
+      </ul>
+      <p>Joylashuv alohida masala: value type o'zini o'rab turgan kontekst qayerda bo'lsa,
+      o'sha yerda saqlanadi. Class maydoni — heap'da, oddiy lokal — odatda stack'da.
+      «Struct = stack» degan kafolat yo'q.</p>
+
+      <div data-d2="value-vs-reference">Bitta amal — nusxa olib, nusxaga yozish — ikki xil
+      natija beradi: struct'da <b>asl qiymat tegilmay qoladi</b>, class'da esa
+      <b>ikkalasi ham 99</b> ko'radi.</div>
+
       <table>
-        <tr><th>Value type</th><th>Reference type</th></tr>
-        <tr><td>struct, int, decimal, enum, DateTime, Guid</td><td>class, string, massiv, delegate, record</td></tr>
-        <tr><td>Qiymatning O'ZINI saqlaydi</td><td>Obyektga HAVOLANI saqlaydi</td></tr>
-        <tr><td>Nusxalanganda butun qiymat ko'chadi</td><td>Faqat havola ko'chadi</td></tr>
-        <tr><td>null bo'la olmaydi</td><td>null bo'la oladi</td></tr>
+        <tr><th>Savol</th><th>Value type</th><th>Reference type</th></tr>
+        <tr><td>Nima saqlanadi</td><td>Qiymatning o'zi</td><td>Obyekt manzili</td></tr>
+        <tr><td>Uzatilganda</td><td>Butun tuzilma ko'chadi</td><td>Manzil ko'chadi</td></tr>
+        <tr><td>Nusxani o'zgartirsa</td><td>Asl tegilmaydi</td><td>Asl ham o'zgaradi</td></tr>
+        <tr><td>null</td><td>Yo'q, T? kerak</td><td>Bor</td></tr>
       </table>
-      <pre><b>struct</b> PointS { <b>public int</b> X; }
-<b>class</b>  PointC { <b>public int</b> X; }
 
-<b>var</b> a = <b>new</b> PointS { X = 1 };  <b>var</b> b = a;  b.X = 99;
-<i>// a.X = </i><s>1</s><i>   — nusxa ko'chirildi</i>
+      <pre><b>struct</b> Money { <b>public decimal</b> Amount; }
 
-<b>var</b> c = <b>new</b> PointC { X = 1 };  <b>var</b> d = c;  d.X = 99;
-<i>// c.X = </i><u>99</u><i>  — bir xil obyekt</i></pre>
-      <h5>Stack/heap — keng tarqalgan soddalashtirish NOTO'G'RI</h5>
-      <pre>┌─ STACK ──────────────┐   ┌─ HEAP ──────────────────┐
-│  int n = 42          │   │  ┌────────────────────┐ │
-│  ┌────────┐          │   │  │ PointC obyekti     │ │
-│  │   42   │          │   │  │  ┌────────┐        │ │
-│  └────────┘          │   │  │  │ X: 99  │ ← int  │ │
-│  PointC c            │   │  │  └────────┘ HEAP'da│ │
-│  ┌────────┐          │   │  └────────────────────┘ │
-│  │ 0x7F.. │──────────┼───┼──────────▲              │
-│  └────────┘  havola  │   │          │              │
-└──────────────────────┘   └─────────────────────────┘</pre>
-      <table>
-        <tr><th>Holat</th><th>Qayerda</th></tr>
-        <tr><td>Metod ichidagi lokal int</td><td>Stack</td></tr>
-        <tr><td>Class maydoni int</td><td><b>HEAP</b> (obyekt ichida)</td></tr>
-        <tr><td>Massiv elementi</td><td><b>HEAP</b></td></tr>
-        <tr><td>Closure'ga tushgan lokal</td><td><b>HEAP</b> (compiler class yaratadi)</td></tr>
-        <tr><td>async lokal (await'dan keyin)</td><td><b>HEAP</b> (state machine)</td></tr>
-      </table>
-      <h5>Boxing</h5>
-      <pre><b>int</b> n = 42;
-<b>object</b> o = n;      <i>// BOXING — heap'da yangi obyekt</i>
+<b>var</b> lines = <b>new</b> List&lt;Money&gt; { <b>new</b>() { Amount = 100m } };
 
-<i>// Yashirin boxing manbalari:</i>
-IComparable c = 42;              <i>// interfeysga cast</i>
-<b>void</b> Log(<b>object</b> m); Log(42);  <i>// object parametr</i>
-ArrayList list; list.Add(42);    <i>// eski kolleksiya</i>
+<b>foreach</b> (<b>var</b> line <b>in</b> lines)
+    <s>line.Amount += 10m;</s>          <i>// nusxaga yozildi</i>
+Console.WriteLine(lines[0].Amount);  <i>// 100 — o'zgarmadi</i>
 
-List&lt;<b>int</b>&gt; ok; ok.Add(42);      <s>// generic — boxing YO'Q</s></pre>
-      <div class="warn"><b>Mutable struct — jimgina bug.</b> Nusxa o'zgartiriladi, asl qiymat qolib ketadi. <code>list[0].X = 5</code> kompilyatsiya xatosi yoki nusxaga yozish beradi. Qoida: <b>struct yozsang — readonly qil</b>.</div>
-      <div class="tip"><code>readonly record struct</code> — eng tavsiya etiladigan kombinatsiya: allocation yo'q, qiymat tengligi bor, kompilyator defensive copy yaratmaydi.</div>`,
+<b>for</b> (<b>int</b> i = 0; i &lt; lines.Count; i++)
+    <u>lines[i] = <b>new</b> Money { Amount = lines[i].Amount + 10m };</u>
+Console.WriteLine(lines[0].Amount);  <i>// 110</i>
+
+<i>// Boxing</i>
+IComparable c = <s>42</s>;              <i>// interfeysga cast — heap allocation</i>
+List&lt;<b>int</b>&gt; gen = []; <u>gen.Add(42);</u>  <i>// generic — boxing yo'q</i></pre>
+
+      <div class="warn"><b>Mutable struct</b> → <code>foreach</code> va property getter nusxa
+      qaytaradi, o'zgarish nusxada qolib ketadi, xato chiqmaydi.</div>
+      <div class="warn"><b>Struct'ni <code>object</code> yoki interfeys sifatida uzatsang</b> →
+      har uzatishda heap allocation, issiq siklda GC bosimi.</div>
+      <div class="warn"><b>Struct ichida <code>List</code> yoki massiv bo'lsa</b> → nusxa yarim
+      bo'ladi, ro'yxat baham ko'riladi.</div>
+      <div class="tip"><code>readonly record struct</code> — birinchi tanlov: allocation yo'q,
+      qiymat tengligi tayyor, defensive copy yaratilmaydi.</div>
+
+      <p class="verdict">Farq bitta narsada: o'zgaruvchida qiymatning o'zi yotadimi yoki
+      obyekt manzili. Value type uzatilganda to'liq nusxalanadi, shuning uchun metod ichidagi
+      o'zgarish chaqiruvchiga yetib bormaydi; reference type'da yetib boradi.
+      «Value type stack'da» — soddalashtirish: class maydoni bo'lsa u heap'da.
+      Amalda struct'ni <code>object</code> ga uzatmayman, chunki bu boxing va allocation.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types" target="_blank" rel="noopener">Value types</a> ·
+      <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing" target="_blank" rel="noopener">Boxing and unboxing</a></p>
+      `,
     questions:[
       {q:"Value type va reference type farqi nima?", a:`
         <p>Value type qiymatni o'zi saqlaydi va uzatilganda <b>to'liq nusxalanadi</b>; reference type havolani saqlaydi va obyekt bitta qoladi.</p>
@@ -387,39 +401,57 @@ List&lt;<b>int</b>&gt; ok; ok.Add(42);      <s>// generic — boxing YO'Q</s></p
     id:"m1-2", title:"string va StringBuilder",
     summary:"Immutability, interning, va siklda += ning O(n²) narxi.",
     lesson:`
-      <p><code>string</code> — reference type, lekin <b>immutable</b>. Har «o'zgartirish» yangi obyekt yaratadi.</p>
-      <pre>s = "Ali";  s += " Vali";
+      <p><code>string</code> — reference type, lekin <b>immutable</b>: yaratilgandan keyin
+      mazmuni o'zgarmaydi. <code>+=</code>, <code>Replace</code>, <code>Trim</code> —
+      hammasi <b>yangi</b> satr qaytaradi, eskisi tegilmaydi. Immutability uch narsani beradi:
+      thread-safety, interning va hash barqarorligi (shuning uchun <code>string</code>
+      lug'at kaliti sifatida ishonchli).</p>
 
-HEAP:
-┌──────────┐      ┌──────────────┐
-│  "Ali"   │      │ "Ali Vali"   │ ← YANGI obyekt
-└──────────┘      └──────────────┘
-     ▲                   ▲
-  (endi hech          s ─┘
-   kim ishlatmaydi)
-   → GC yig'adi</pre>
-      <p><b>Nega immutable:</b> thread-safety · interning · hash barqarorligi (Dictionary kaliti).</p>
-      <h5>Siklda += → O(n²)</h5>
-      <pre>iteratsiya 1:  "a"    → 1 belgi ko'chiriladi
-iteratsiya 2:  "ab"   → 2 belgi
-iteratsiya 3:  "abc"  → 3 belgi
-...
-iteratsiya n:         → n belgi
-                      ─────────────
-                jami:  n(n+1)/2 = <u>O(n²)</u>
+      <div data-d2="string-immutable"><code>s += " Vali"</code> eski satrni tahrirlamaydi —
+      yangi obyekt yaratiladi, eskisi GC'ga tushadi. Shuning uchun sikl ichidagi
+      <code>+=</code> har aylanishda bitta allocation qo'shadi.</div>
 
-10 000 iteratsiya → ~50 mln belgi + 10 000 allocation</pre>
-      <pre><i>// ❌ O(n²)</i>
-<b>string</b> s = ""; <b>for</b> (...) s += i;
+      <table>
+        <tr><th>Vazifa</th><th>To'g'ri vosita</th><th>Narx</th></tr>
+        <tr><td>Siklda yig'ish</td><td>StringBuilder</td><td>O(n)</td></tr>
+        <tr><td>Siklda +=</td><td>Ishlatilmaydi</td><td><b>O(n²)</b></td></tr>
+        <tr><td>Tayyor kolleksiya</td><td>string.Join</td><td>O(n)</td></tr>
+        <tr><td>a + b + c</td><td>Oddiy +</td><td>Bitta Concat</td></tr>
+      </table>
 
-<i>// ✅ O(n)</i>
-<b>var</b> sb = <b>new</b> StringBuilder(); <b>for</b> (...) sb.Append(i);
+      <pre><i>// TIPIK XATO — har iteratsiya yangi satr</i>
+<b>string</b> s = "";
+<b>for</b> (<b>int</b> i = 0; i &lt; 10_000; i++) <s>s += i;</s>
+<i>// 10 000 allocation, ~50 mln belgi ko'chirish</i>
 
-<i>// ✅ Ma'lum kolleksiya uchun eng sodda</i>
-<b>string</b> joined = <b>string</b>.Join(<i>", "</i>, items);</pre>
-      <div class="tip"><code>a + b + c</code> uchun <code>StringBuilder</code> KERAK EMAS — kompilyator uni bitta <code>string.Concat</code> ga aylantiradi, bu allaqachon optimal.</div>
-      <div class="warn"><b>Turk «i» muammosi:</b> <code>"I".ToLower()</code> turk madaniyatida nuqtasiz «ı» beradi. Solishtirishda har doim <code>StringComparison.Ordinal</code> ni aniq ko'rsating.</div>
-      <div class="warn">Parol va karta raqamini <code>string</code>da saqlamang — immutable bo'lgani uchun xotiradan ishonchli o'chirib bo'lmaydi va memory dump'da qoladi.</div>`,
+<b>var</b> sb = <b>new</b> StringBuilder();
+<b>for</b> (<b>int</b> i = 0; i &lt; 10_000; i++) <u>sb.Append(i);</u>
+<b>string</b> result = sb.ToString();
+
+<i>// Kolleksiya uchun eng sodda</i>
+<b>string</b> joined = <u><b>string</b>.Join(", ", items);</u>
+
+<i>// Solishtirishda madaniyat aniq ko'rsatiladi</i>
+<b>if</b> (code.Equals(other, <u>StringComparison.Ordinal</u>)) { }</pre>
+
+      <div class="warn"><b>Siklda <code>+=</code> yozsang</b> → n(n+1)/2 belgi ko'chiriladi;
+      10 000 element hisoblashni sekundlarga cho'zadi.</div>
+      <div class="warn"><b>Madaniyatni ko'rsatmasang</b> → <code>"I".ToLower()</code> turk
+      madaniyatida nuqtasiz «ı» beradi va kod solishtiruvi buziladi.
+      <code>StringComparison.Ordinal</code> yoz.</div>
+      <div class="warn"><b>Parol yoki karta raqamini <code>string</code> da saqlasang</b> →
+      immutable bo'lgani uchun xotiradan o'chira olmaysan, memory dump'da qoladi.</div>
+      <div class="tip"><code>a + b + c</code> uchun <code>StringBuilder</code> kerak emas —
+      kompilyator uni bitta <code>string.Concat</code> ga aylantiradi.</div>
+
+      <p class="verdict"><code>string</code> immutable, shuning uchun har «o'zgartirish»
+      yangi obyekt yaratadi. Siklda <code>+=</code> ishlatilsa bu O(n²) ga aylanadi —
+      o'rniga <code>StringBuilder</code>, tayyor kolleksiya bo'lsa <code>string.Join</code>.
+      Immutability bejiz emas: u thread-safety va hash barqarorligini beradi.
+      Solishtirishda esa har doim <code>StringComparison</code> ni aniq ko'rsataman.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/strings/" target="_blank" rel="noopener">Strings and string literals</a> ·
+      <a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.stringbuilder" target="_blank" rel="noopener">StringBuilder</a></p>
+      `,
     questions:[
       {q:"string reference type bo'lsa, nega o'zgartirib bo'lmaydi?", a:`
         <p>U <b>immutable</b> qilib loyihalangan — thread-safety, interning va hash barqarorligi uchun. Har «o'zgartirish» yangi obyekt yaratadi.</p>
@@ -433,36 +465,57 @@ iteratsiya n:         → n belgi
     id:"m1-3", title:"struct, record, ref struct",
     summary:"To'rt xil tur e'loni va qaysi biri qachon.",
     lesson:`
-      <pre>                    TUR TANLASH
-                         │
-        ┌────────────────┴────────────────┐
-        ▼                                 ▼
-   VALUE TYPE                      REFERENCE TYPE
-   (stack/inline)                       (heap)
-        │                                 │
-   ┌────┴─────┐                    ┌──────┴──────┐
-   ▼          ▼                    ▼             ▼
- struct  record struct           class      record class
- mutable  qiymat tengligi        havola     qiymat tengligi
- qo'lda   avtomatik              tengligi   with, ToString
- Equals   with, ToString</pre>
+      <p>To'rt xil e'lon bir-biridan ikki savol bilan ajraladi: <b>qiymat semantikasi</b>
+      kerakmi va <b>tenglik</b> avtomatik yozilsinmi. <code>class</code> — havola semantikasi,
+      tenglik havola bo'yicha. <code>record</code> — havola, lekin tenglik qiymat bo'yicha.
+      <code>struct</code> — qiymat semantikasi, tenglikni o'zing yozasan.
+      <code>record struct</code> — ikkalasi ham qiymat bo'yicha.</p>
+
+      <div data-d2="type-choice">Tanlov ikki bosqichli: avval qiymat semantikasi kerakmi,
+      keyin tenglik avtomatik bo'lsinmi. <b>readonly record struct</b> ko'p hollarda eng
+      yaxshi kombinatsiya — allocation yo'q, qiymat tengligi va <code>with</code> tayyor.</div>
+
       <table>
         <tr><th>E'lon</th><th>Tenglik</th><th>Qachon</th></tr>
         <tr><td>class</td><td>Havola</td><td>Xulq-atvorli domen obyektlari</td></tr>
         <tr><td>record</td><td><b>Qiymat</b></td><td>DTO, event, immutable ma'lumot</td></tr>
-        <tr><td>struct</td><td>Qo'lda yozish kerak</td><td>Kichik, tez-tez ishlatiladigan</td></tr>
-        <tr><td><b>readonly record struct</b></td><td>Qiymat</td><td><b>Money — eng tavsiya etilgani</b></td></tr>
+        <tr><td>struct</td><td>Qo'lda yoziladi</td><td>Kichik, tez-tez ishlatiladigan</td></tr>
+        <tr><td><b>readonly record struct</b></td><td>Qiymat</td><td><b>Money — birinchi tanlov</b></td></tr>
         <tr><td>ref struct</td><td>—</td><td>Span&lt;T&gt;, yuqori performans</td></tr>
       </table>
+
       <pre><b>public record</b> Customer(<b>string</b> Name, <b>string</b> Phone);
 
-a == b                          <i>// </i><s>True</s><i> — qiymat bo'yicha!</i>
-a.ToString()                    <i>// Customer { Name = Ali, ... }</i>
-<b>var</b> c = a <b>with</b> { Phone = <i>"..."</i> };  <i>// nusxa, bitta maydon</i>
-<b>var</b> (name, phone) = a;          <i>// deconstruction</i></pre>
-      <p><code>ref struct</code> cheklovlari (hammasi bitta sababdan — heap'ga tushmaydi): class maydoni bo'la olmaydi · boxing yo'q · massivda saqlanmaydi · <code>async</code> da <code>await</code> orqali o'tmaydi · LINQ'da ishlamaydi.</p>
-      <div class="warn"><b>record ichida massiv — jimgina bug.</b> Kompilyator yozgan <code>Equals</code> massivni <b>havola</b> bo'yicha taqqoslaydi: <code>new Order("1",["a"]) == new Order("1",["a"])</code> → <b>False</b>. Yechim: <code>ImmutableArray</code> + qo'lda <code>Equals</code>.</div>
-      <div class="tip">Struct yozsangiz — <code>readonly</code> qiling. Aks holda kompilyator ehtiyot yuzasidan har murojaatda defensive copy yaratadi va performans yutug'i yo'qoladi.</div>`,
+a == b                          <i>// True — qiymat bo'yicha</i>
+<b>var</b> c = a <b>with</b> { Phone = "..." };  <i>// nusxa, bitta maydon o'zgargan</i>
+<b>var</b> (name, phone) = a;          <i>// deconstruction</i>
+
+<i>// TIPIK XATO — record ichida massiv</i>
+<b>public record</b> Order(<b>string</b> Id, <s><b>string</b>[] Tags</s>);
+<b>new</b> Order("1", ["a"]) == <b>new</b> Order("1", ["a"])   <i>// </i><s>False</s>
+<i>// Kompilyator yozgan Equals massivni HAVOLA bo'yicha solishtiradi</i>
+
+<b>public record</b> Order(<b>string</b> Id, <u>ImmutableArray&lt;<b>string</b>&gt; Tags</u>);  <i>// + qo'lda Equals</i></pre>
+
+      <p><code>ref struct</code> ning barcha cheklovlari bitta sababdan — u heap'ga
+      tushmaydi: class maydoni bo'la olmaydi, boxing qilinmaydi, massivda saqlanmaydi,
+      <code>await</code> orqali o'tmaydi, LINQ'da ishlamaydi.</p>
+
+      <div class="warn"><b>record ichiga massiv qo'ysang</b> → tenglik havola bo'yicha
+      ishlaydi va bir xil ko'rinadigan ikki obyekt teng bo'lmaydi.</div>
+      <div class="warn"><b>struct'ni <code>readonly</code> qilmasang</b> → kompilyator har
+      murojaatda defensive copy yaratadi va performans yutug'i yo'qoladi.</div>
+      <div class="tip">Domen qiymatlari uchun (Money, AccountNumber, Percentage) —
+      <code>readonly record struct</code>; kimliklari bor obyektlar uchun — <code>class</code>.</div>
+
+      <p class="verdict">Men turni ikki savol bilan tanlayman: qiymat semantikasi kerakmi
+      va tenglik qiymat bo'yicha bo'lsinmi. DTO va event uchun <code>record</code>, kichik
+      domen qiymatlari uchun <code>readonly record struct</code> — allocation yo'q va tenglik
+      tayyor. <code>class</code> ni kimligi bor, xulq-atvorli obyektlarga qoldiraman.
+      <code>ref struct</code> faqat <code>Span</code> bilan ishlaydigan issiq yo'lda kerak.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record" target="_blank" rel="noopener">Records</a> ·
+      <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct" target="_blank" rel="noopener">Structure types</a></p>
+      `,
     questions:[
       {q:"record va class farqi nima?", a:`
         <p><code>record</code> — bu <code>class</code>, lekin kompilyator unga <b>qiymat semantikasini</b> qo'shadi: <code>Equals</code>, <code>GetHashCode</code>, <code>ToString</code>, <code>==</code>, <code>with</code> va deconstruction avtomatik yoziladi.</p>
@@ -476,39 +529,58 @@ a.ToString()                    <i>// Customer { Name = Ali, ... }</i>
     id:"m1-4", title:"Equals va GetHashCode", hot:true,
     summary:"Shartnoma buzilsa Dictionary jimgina noto'g'ri ishlaydi.",
     lesson:`
-      <h5>Dictionary ichida nima bo'ladi</h5>
-      <pre>dict[key] = value:
+      <p>Lug'atdagi qidiruv <b>hash bilan boshlanadi</b>: <code>GetHashCode</code> bucket'ni
+      tanlaydi, keyin shu bucket ichida <code>Equals</code> chaqiriladi. Demak hash noto'g'ri
+      bo'lsa <code>Equals</code> umuman chaqirilmaydi — element lug'atda turgani holda
+      topilmaydi. Shuning uchun bu ikkovi <b>doim birga</b> override qilinadi.</p>
 
-1. hash = key.GetHashCode()
-        │
-2. bucket = hash % bucketCount
-        │
-        ▼
-   ┌──────────────────────────────┐
-   │ bucket 3: [entry] → [entry]  │ ← zanjir (kolliziya)
-   └──────────────────────────────┘
-        │
-3. har element uchun: key.Equals(entry.Key)
-        │
-        ▼
-   topildi → yangilanadi
+      <div data-d2="dict-lookup">Qidiruv hash bilan boshlanadi. Teng obyektlar har xil hash
+      bersa, qidiruv <b>boshqa bucket'ga</b> tushadi va <code>Equals</code> chaqirilmaydi —
+      element «yo'qolgandek» ko'rinadi.</div>
 
-<u>⚠ GetHashCode har xil bo'lsa → BOSHQA bucket
-  → Equals umuman chaqirilmaydi → element "yo'qoladi"</u></pre>
-      <h5>Shartnoma</h5>
-      <pre>1. a.Equals(a) → true                        (refleksivlik)
-2. a.Equals(b) == b.Equals(a)                (simmetriya)
-3. a.Equals(b) && b.Equals(c) → a.Equals(c)  (tranzitivlik)
-4. <b>a.Equals(b) ⟹ a.GetHashCode() == b.GetHashCode()</b>  ← ENG MUHIM
-5. Teskarisi shart EMAS
-6. Obyekt o'zgarmaguncha hash o'zgarmasin</pre>
-      <pre><b>public override int</b> GetHashCode() =&gt; HashCode.Combine(Bank, Branch, Number);
+      <table>
+        <tr><th>Shartnoma bandi</th><th>Ma'nosi</th></tr>
+        <tr><td>Refleksivlik</td><td>a.Equals(a) → true</td></tr>
+        <tr><td>Simmetriya</td><td>a.Equals(b) == b.Equals(a)</td></tr>
+        <tr><td>Tranzitivlik</td><td>a=b va b=c → a=c</td></tr>
+        <tr><td><b>Hash muvofiqligi</b></td><td><b>Teng obyekt → teng hash</b></td></tr>
+        <tr><td>Barqarorlik</td><td>Obyekt o'zgarmasa hash o'zgarmaydi</td></tr>
+      </table>
 
-<i>// ❌ Qo'lda XOR:</i>
-Bank.GetHashCode() <u>^</u> Branch.GetHashCode()
-<i>//    XOR kommutativ → (A,B) va (B,A) BIR XIL hash</i></pre>
-      <div class="warn"><b>Mutable kalit — eng jimgina bug.</b> Kalitning hash'i o'zgarsa, element eski bucket'da qolib ketadi: <code>dict.Count</code> uni ko'rsatadi, lekin <code>TryGetValue</code> topmaydi.</div>
-      <div class="tip"><code>record</code> bularning hammasini to'g'ri yozadi — value object'lar uchun shuning uchun afzal. Kalitlar immutable bo'lsin: <code>string</code>, <code>Guid</code>, <code>readonly record struct</code>.</div>`,
+      <p>Teskarisi shart emas: hash teng bo'lsa obyektlar teng bo'lishi shart emas —
+      bu oddiy to'qnashuv, <code>Equals</code> uni hal qiladi.</p>
+
+      <pre><b>public override bool</b> Equals(<b>object</b>? o) =&gt;
+    o <b>is</b> Account a &amp;&amp; a.Bank == Bank &amp;&amp; a.Number == Number;
+
+<b>public override int</b> GetHashCode() =&gt;
+    <u>HashCode.Combine(Bank, Branch, Number);</u>
+
+<i>// TIPIK XATO — qo'lda XOR</i>
+<b>public override int</b> GetHashCode() =&gt;
+    <s>Bank.GetHashCode() ^ Branch.GetHashCode();</s>
+<i>// XOR kommutativ: (A,B) va (B,A) bir xil hash beradi</i></pre>
+
+      <div class="warn"><b>Equals ni yozib GetHashCode ni unutsang</b> → teng obyektlar har xil
+      bucket'ga tushadi, <code>Dictionary</code> va <code>HashSet</code> jimgina noto'g'ri
+      ishlaydi.</div>
+      <div class="warn"><b>Kalitni lug'atga solgandan keyin o'zgartirsang</b> → hash o'zgaradi,
+      element eski bucket'da qolib ketadi: <code>Count</code> uni ko'rsatadi,
+      <code>TryGetValue</code> topmaydi.</div>
+      <div class="warn"><b>Hash'ni ma'lumotlar bazasi yoki keshga saqlasang</b> →
+      <code>string.GetHashCode</code> jarayondan jarayonga o'zgaradi; barqaror hash kerak
+      bo'lsa SHA256 kabi aniq algoritm ishlat.</div>
+      <div class="tip"><code>record</code> ikkovini ham to'g'ri yozadi. Kalitlar immutable
+      bo'lsin: <code>string</code>, <code>Guid</code>, <code>readonly record struct</code>.</div>
+
+      <p class="verdict">Qidiruv avval hash bilan bucket topadi, keyin <code>Equals</code>
+      bilan solishtiradi — shuning uchun teng obyektlar albatta teng hash berishi kerak,
+      aks holda element lug'atda turib topilmay qoladi. Hash'ni <code>HashCode.Combine</code>
+      bilan yozaman, qo'lda XOR emas, chunki XOR maydonlar tartibini yo'qotadi.
+      Kalit sifatida faqat immutable turlarni ishlataman.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode" target="_blank" rel="noopener">Object.GetHashCode</a> ·
+      <a href="https://learn.microsoft.com/en-us/dotnet/api/system.hashcode" target="_blank" rel="noopener">HashCode.Combine</a></p>
+      `,
     questions:[
       {q:"GetHashCode va Equals nega birga override qilinadi?", a:`
         <p>Hash jadval avval hash bo'yicha bucket topadi, keyin <code>Equals</code> bilan aniqlaydi.</p>
@@ -526,32 +598,59 @@ Bank.GetHashCode() <u>^</u> Branch.GetHashCode()
     id:"m1-5", title:"null va nullable reference types",
     summary:"Compile-time tahlil, runtime himoya emas. Result vs null.",
     lesson:`
-      <pre><b>#nullable enable</b>
+      <p>Nullable reference types — bu <b>kompilyator tahlili</b>, runtime himoyasi emas.
+      <code>#nullable enable</code> yoqilganda <code>string</code> «null bo'lmasligi kerak»,
+      <code>string?</code> esa «null bo'lishi mumkin» degan ma'noni bildiradi va kompilyator
+      mos kelmaganda ogohlantiradi. IL'ga hech qanday tekshiruv qo'shilmaydi.</p>
 
-<b>string</b>  name;   <i>// null BO'LMASLIGI kerak — kompilyator ogohlantiradi</i>
-<b>string?</b> phone;  <i>// null bo'lishi MUMKIN — tekshiring</i></pre>
-      <div class="warn"><b>Bu faqat KOMPILYATOR tahlili.</b> Runtime'da hech qanday himoya qo'shilmaydi — <code>null</code> reflection, JSON deserializatsiya yoki eski kutubxona orqali kelib tushishi mumkin. Ommaviy API chegarasida <code>ArgumentNullException.ThrowIfNull</code> baribir yoziladi.</div>
-      <pre><b>int?</b> len = customer?.Name?.Length;      <i>// null-conditional</i>
-<b>string</b> d = customer?.Name ?? <i>"Noma'lum"</i>;  <i>// null-coalescing</i>
-_cache ??= <b>new</b>();                        <i>// null bo'lsa tayinlash</i>
-<b>var</b> n = customer<u>!</u>.Name;                 <i>// null-forgiving — himoyani O'CHIRADI</i>
+      <pre class="dg">KOMPILYATSIYA VAQTI          ISHLASH VAQTI
+┌──────────────────────┐     ┌──────────────────────┐
+│ string  → warning    │     │ hech qanday tekshiruv │
+│ string? → tekshir    │ ──► │ qo'shilmaydi          │
+└──────────────────────┘     └──────────────────────┘
+                                       ▲
+     JSON, reflection, eski kutubxona ─┘  null shu yerdan kiradi</pre>
+      <p>Shuning uchun ommaviy API chegarasida <code>ArgumentNullException.ThrowIfNull</code>
+      baribir yoziladi — annotatsiya uni almashtirmaydi.</p>
 
-<b>if</b> (customer <b>is not null</b>) { }          <i>// != null dan XAVFSIZROQ</i></pre>
-      <p><code>!=</code> operatori override qilingan bo'lishi mumkin; <code>is not null</code> esa har doim haqiqiy null tekshiruvini qiladi.</p>
-      <h5>Metod natija topa olmasa nima qaytaradi</h5>
       <table>
-        <tr><th>Variant</th><th>Muammo / qachon</th></tr>
-        <tr><td>null</td><td>Chaqiruvchi tekshirishni UNUTADI</td></tr>
-        <tr><td>Exception</td><td>Kutilgan holat uchun QIMMAT</td></tr>
-        <tr><td><b>Result&lt;T&gt;</b></td><td>Xato SABABI bilan — eng ochiq</td></tr>
-        <tr><td>Bo'sh kolleksiya</td><td>Kolleksiya uchun HAR DOIM shu</td></tr>
+        <tr><th>Metod natija topmasa</th><th>Oqibat / qachon</th></tr>
+        <tr><td>null</td><td>Chaqiruvchi tekshirishni unutadi</td></tr>
+        <tr><td>Exception</td><td>Kutilgan holat uchun qimmat</td></tr>
+        <tr><td><b>Result&lt;T&gt;</b></td><td>Xato sababi bilan — eng ochiq</td></tr>
+        <tr><td>Bo'sh kolleksiya</td><td>Kolleksiya uchun har doim shu</td></tr>
       </table>
-      <pre><i>// ✅ Biznes natijasi uchun Result</i>
+
+      <pre><b>int?</b> len = customer?.Name?.Length;      <i>// null-conditional</i>
+<b>string</b> d = customer?.Name ?? "Noma'lum";  <i>// null-coalescing</i>
+_cache ??= <b>new</b>();                        <i>// null bo'lsa tayinlash</i>
+
+<i>// TIPIK XATO — null-forgiving bilan ogohlantirishni o'chirish</i>
+<b>var</b> n = <s>customer!.Name;</s>   <i>// tahlil o'chdi, NullReferenceException qoldi</i>
+<b>var</b> n = <u><b>if</b> (customer <b>is not null</b>) customer.Name;</u>
+
+<i>// Biznes natijasi uchun Result</i>
 <b>public</b> Result&lt;Payment&gt; Charge(Money amount) =&gt;
     balance &lt; amount
-        ? Result.Fail&lt;Payment&gt;(<i>"Mablag' yetarli emas"</i>)
+        ? Result.Fail&lt;Payment&gt;("Mablag' yetarli emas")
         : Result.Ok(<b>new</b> Payment(amount));</pre>
-      <div class="tip">Fintech'da: <code>Money?</code> emas <code>Money</code>. Hisob mavjud bo'lsa balansi ham bor — topilmasa <code>Result</code> yoki exception.</div>`,
+
+      <div class="warn"><b><code>!</code> (null-forgiving) yozsang</b> → kompilyator jim bo'ladi,
+      lekin null baribir keladi va <code>NullReferenceException</code> chiqadi.</div>
+      <div class="warn"><b><code>!= null</code> ishlatsang</b> → operator override qilingan
+      bo'lishi mumkin. <code>is not null</code> har doim haqiqiy null tekshiruvini qiladi.</div>
+      <div class="warn"><b>Chegarada tekshiruvni tashlab ketsang</b> → JSON deserializatsiya
+      annotatsiyaga qaramaydi va <code>null</code> ni bemalol o'rnatadi.</div>
+      <div class="tip">Fintech'da <code>Money?</code> emas <code>Money</code>. Hisob bo'lsa
+      balansi ham bor; topilmasa <code>Result</code> yoki exception.</div>
+
+      <p class="verdict">Nullable reference types — kompilyator tahlili, runtime himoyasi emas:
+      IL'ga hech narsa qo'shilmaydi, shuning uchun ommaviy chegarada
+      <code>ThrowIfNull</code> ni baribir yozaman. <code>!</code> operatorini deyarli
+      ishlatmayman — u muammoni yashiradi. Metod natija topa olmasa null qaytarish o'rniga
+      <code>Result</code> ishlataman, kolleksiyada esa har doim bo'sh kolleksiya.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/csharp/nullable-references" target="_blank" rel="noopener">Nullable reference types</a></p>
+      `,
     questions:[
       {q:"Nullable reference types runtime himoya beradimi?", a:`
         <p>Yo'q. Bu faqat kompilyator tahlili — annotatsiyalar metadata sifatida saqlanadi, lekin CLR tekshiruv qo'shmaydi.</p>
@@ -570,30 +669,64 @@ _cache ??= <b>new</b>();                        <i>// null bo'lsa tayinlash</i>
     id:"m1-6", title:"Generics va variantlik",
     summary:"in/out, va nega List<T> invariant.",
     lesson:`
-      <pre>KOVARIANT (out) — chiqish uchun, "kengroqqa"
+      <p>Variantlik — generic interfeysni yaqin turdagi boshqa generic interfeysga
+      o'tkazish imkoni. Qoida yo'nalishdan kelib chiqadi: tur faqat <b>chiqishda</b>
+      ishlatilsa <code>out</code> (kovariant), faqat <b>kirishda</b> ishlatilsa
+      <code>in</code> (kontravariant). Ikkalasi ham bo'lsa — invariant.</p>
+
+      <pre class="dg">KOVARIANT (out) — faqat qaytaradi
 ┌────────────────────────────────────────────┐
-│ IEnumerable&lt;Dog&gt; → IEnumerable&lt;Animal&gt;  <s>✓</s>  │
-│ Har it — hayvon, demak itlar ro'yxatini    │
-│ hayvonlar ro'yxati sifatida O'QISH xavfsiz │
+│ IEnumerable&lt;Dog&gt; → IEnumerable&lt;Animal&gt;   <u>✓</u> │
+│ O'qish xavfsiz: har it — hayvon            │
 └────────────────────────────────────────────┘
 
-KONTRAVARIANT (in) — kirish uchun, "torroqqa"
+KONTRAVARIANT (in) — faqat qabul qiladi
 ┌────────────────────────────────────────────┐
-│ IComparer&lt;Animal&gt; → IComparer&lt;Dog&gt;      <s>✓</s>  │
+│ IComparer&lt;Animal&gt; → IComparer&lt;Dog&gt;       <u>✓</u> │
 │ Hayvonlarni solishtira olsa, itlarni ham   │
 └────────────────────────────────────────────┘
 
-INVARIANT — ikkalasi ham bo'lsa
+INVARIANT — ikkalasi ham bor
 ┌────────────────────────────────────────────┐
-│ List&lt;Dog&gt; → List&lt;Animal&gt;                <u>✗</u>  │
-│ Sabab: List'ga YOZISH ham mumkin —         │
-│ hayvonlar ro'yxatiga mushuk qo'shib bo'lardi│
+│ List&lt;Dog&gt; → List&lt;Animal&gt;                 <s>✗</s> │
+│ Aks holda itlar ro'yxatiga mushuk qo'shilar │
 └────────────────────────────────────────────┘</pre>
-      <pre><b>public interface</b> IProducer&lt;<b>out</b> T&gt; { T Get(); }        <i>// faqat qaytaradi</i>
-<b>public interface</b> IConsumer&lt;<b>in</b> T&gt;  { <b>void</b> Set(T x); }  <i>// faqat qabul qiladi</i></pre>
-      <p>.NET'da generic'lar <b>runtime darajasida</b> saqlanadi (Java'dagi type erasure emas). JIT <code>List&lt;int&gt;</code> uchun ixtisoslashgan kod generatsiya qiladi — boxing yo'q.</p>
-      <div class="warn"><b>Massiv kovariantligi — C#dagi eski xato.</b> <code>Animal[] a = new Dog[1]; a[0] = new Cat();</code> kompilyatsiyadan o'tadi, lekin ishlash vaqtida <code>ArrayTypeMismatchException</code>. Zamonaviy kodda <code>IReadOnlyList&lt;T&gt;</code> afzal — u to'g'ri kovariant.</div>
-      <div class="tip">C# 11 generic matematika: <code>where T : INumber&lt;T&gt;</code> bilan tur-agnostik arifmetika yozish mumkin.</div>`,
+
+      <table>
+        <tr><th>Modifikator</th><th>Tur qayerda</th><th>Misol</th></tr>
+        <tr><td>out</td><td>Faqat qaytish qiymatida</td><td>IEnumerable&lt;T&gt;</td></tr>
+        <tr><td>in</td><td>Faqat parametrda</td><td>IComparer&lt;T&gt;</td></tr>
+        <tr><td>yo'q</td><td>Ikkalasida</td><td>List&lt;T&gt;, IList&lt;T&gt;</td></tr>
+      </table>
+
+      <pre><b>public interface</b> IProducer&lt;<b>out</b> T&gt; { T Get(); }
+<b>public interface</b> IConsumer&lt;<b>in</b> T&gt;  { <b>void</b> Set(T x); }
+
+<i>// TIPIK XATO — massiv kovariantligi</i>
+Animal[] a = <s><b>new</b> Dog[1];</s>      <i>// kompilyatsiyadan o'tadi</i>
+a[0] = <b>new</b> Cat();            <i>// ArrayTypeMismatchException</i>
+
+IReadOnlyList&lt;Animal&gt; ok = <u><b>new</b> List&lt;Dog&gt;();</u>  <i>// to'g'ri kovariant</i></pre>
+
+      <p>.NET'da generic'lar <b>runtime darajasida</b> saqlanadi — Java'dagi type erasure
+      emas. JIT <code>List&lt;int&gt;</code> uchun ixtisoslashgan kod generatsiya qiladi,
+      shuning uchun boxing bo'lmaydi.</p>
+
+      <div class="warn"><b>Massiv kovariantligiga tayansang</b> → xato kompilyatsiyada emas,
+      ishlash vaqtida chiqadi. Zamonaviy kodda <code>IReadOnlyList&lt;T&gt;</code> ishlat.</div>
+      <div class="warn"><b><code>out</code> turini parametrda ishlatsang</b> → kompilyatsiya
+      xatosi. Bu cheklov bejiz emas: u yuqoridagi mushuk holatini oldini oladi.</div>
+      <div class="tip">C# 11 dan generic matematika bor: <code>where T : INumber&lt;T&gt;</code>
+      bilan tur-agnostik arifmetika yoziladi.</div>
+
+      <p class="verdict">Variantlik turning yo'nalishi bilan belgilanadi: faqat chiqishda
+      bo'lsa <code>out</code>, faqat kirishda bo'lsa <code>in</code>.
+      <code>List&lt;T&gt;</code> invariant, chunki unga yozish ham mumkin — aks holda
+      hayvonlar ro'yxatiga mushuk qo'shib yuborish mumkin bo'lardi. Massivlar tarixiy
+      sabablarga ko'ra kovariant va bu xato ishlash vaqtida chiqadi, shuning uchun
+      <code>IReadOnlyList</code> ni afzal ko'raman.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/covariance-contravariance/" target="_blank" rel="noopener">Covariance and contravariance</a></p>
+      `,
     questions:[
       {q:"Kovariantlik va kontravariantlik nima?", a:`
         <p><b>Kovariantlik (out)</b> — turni «kengroq»ga o'zgartirish, faqat <b>chiqish</b> pozitsiyasida xavfsiz.</p>
@@ -608,53 +741,71 @@ INVARIANT — ikkalasi ham bo'lsa
     id:"m1-7", title:"Delegate, event, closure",
     summary:"Multicast tuzog'i, for siklidagi closure, va event xotira sizishi.",
     lesson:`
-      <h5>Multicast zanjiri</h5>
-      <pre>Action a = M1; a += M2; a += M3; a();
+      <p>Delegate — metodga havola. Bir nechta metod qo'shilsa u <b>multicast</b> bo'ladi va
+      ro'yxat tartibida chaqiriladi. Lambda tashqi o'zgaruvchini ishlatsa, kompilyator uni
+      class maydoniga ko'chiradi — bu <b>closure</b>, va o'zgaruvchi endi heap'da yashaydi.</p>
+
+      <pre class="dg">Action a = M1; a += M2; a += M3; a();
 
 ┌────┐   ┌────┐   ┌────┐
 │ M1 │──►│ M2 │──►│ M3 │
 └────┘   └────┘   └────┘
-           <u>✗ exception</u>
+           <s>exception</s>
               │
               └── M3 CHAQIRILMAYDI
 
-Func zanjirida FAQAT OXIRGI natija qaytadi:
-Func&lt;int&gt; f = () =&gt; 1; f += () =&gt; 2;
-f()  →  <u>2</u>   (birinchisi bajarildi, natijasi tashlandi)</pre>
-      <h5>Closure — for siklidagi klassik tuzoq</h5>
-      <pre><b>for</b> (<b>int</b> i = 0; i &lt; 3; i++)
-    actions.Add(() =&gt; Console.Write(i));
+Func zanjirida faqat OXIRGI natija qaytadi.</pre>
 
-Kompilyator quradi:
-┌────────────────────────────┐
-│ class Closure {            │
-│     public int i;          │  ← BITTA umumiy o'zgaruvchi
-│ }                          │
-└────────────────────────────┘
-     ▲        ▲        ▲
-  lambda1  lambda2  lambda3   ← hammasi bir joyga qaraydi
+      <table>
+        <tr><th>Holat</th><th>Natija</th></tr>
+        <tr><td>Multicast'da exception</td><td>Keyingilari chaqirilmaydi</td></tr>
+        <tr><td>Func multicast</td><td>Faqat oxirgi natija</td></tr>
+        <tr><td>for siklidagi lambda</td><td>Bitta umumiy o'zgaruvchi</td></tr>
+        <tr><td>foreach siklidagi lambda</td><td>Har iteratsiyada yangi</td></tr>
+      </table>
 
-Sikl tugaganda i = 3 → natija: <u>"333"</u></pre>
-      <pre><i>// ✅ Lokal nusxa</i>
+      <pre><i>// TIPIK XATO — for siklida closure</i>
+<b>for</b> (<b>int</b> i = 0; i &lt; 3; i++)
+    actions.Add(() =&gt; Console.Write(<s>i</s>));
+<i>// Hamma lambda bitta i ga qaraydi → "333"</i>
+
 <b>for</b> (<b>int</b> i = 0; i &lt; 3; i++) {
-    <b>int</b> copy = i;
-    actions.Add(() =&gt; Console.Write(copy));   <s>// 012</s>
+    <u><b>int</b> copy = i;</u>
+    actions.Add(() =&gt; Console.Write(copy));   <i>// "012"</i>
 }
 
-<i>// ✅ foreach — C# 5 dan beri har iteratsiyada yangi o'zgaruvchi</i>
-<b>foreach</b> (<b>var</b> x <b>in</b> new[]{0,1,2}) actions.Add(() =&gt; Console.Write(x));  <s>// 012</s></pre>
-      <h5>Event orqali xotira sizishi</h5>
-      <pre>┌──────────────────┐          ┌──────────────────┐
-│  Publisher       │  event   │  Subscriber      │
-│  (uzoq yashaydi) │  havola  │  (qisqa umr)     │
-│  Completed ──────┼─────────►│  OnCompleted     │
+<i>// foreach — C# 5 dan beri har iteratsiyada yangi o'zgaruvchi</i>
+<b>foreach</b> (<b>var</b> x <b>in</b> items) actions.Add(() =&gt; Console.Write(x));  <i>// "012"</i></pre>
+
+      <pre class="dg">EVENT ORQALI XOTIRA SIZISHI
+
+┌──────────────────┐  event   ┌──────────────────┐
+│ Publisher        │  havola  │ Subscriber       │
+│ (uzoq yashaydi)  │─────────►│ (qisqa umr)      │
 └──────────────────┘          └──────────────────┘
-                                       ▲
-Subscriber "o'lishi" kerak edi,        │
-lekin publisher havola ushlab turibdi ─┘
-→ GC yig'a olmaydi → <u>XOTIRA SIZISHI</u></pre>
-      <div class="tip"><code>event</code> — delegate maydon ustidagi <b>himoya</b>: tashqi kod faqat <code>+=</code> va <code>-=</code> qila oladi, butun zanjirni <code>null</code> qilib yuborolmaydi.</div>
-      <div class="warn"><b>Fintech'da domen hodisalari uchun C# <code>event</code> ISHLATILMAYDI</b> — u sinxron, jarayon ichida, tranzaksiya chegarasidan chiqmaydi va handler'dagi xato asosiy oqimni buzadi. O'rniga outbox.</div>`,
+                                      ▲
+   o'lishi kerak edi, lekin havola ───┘  → GC yig'a olmaydi</pre>
+
+      <div class="warn"><b>Multicast handler'da exception tashlasang</b> → zanjirning
+      qolgan qismi bajarilmaydi va buni hech kim sezmaydi.</div>
+      <div class="warn"><b><code>-=</code> bilan obuna bekor qilinmasa</b> → publisher
+      subscriber'ni ushlab turadi va u GC'ga tushmaydi.</div>
+      <div class="warn"><b>Domen hodisalari uchun C# <code>event</code> ishlatsang</b> →
+      u sinxron, jarayon ichida, tranzaksiya chegarasidan chiqmaydi; handler'dagi xato
+      asosiy oqimni buzadi. O'rniga outbox.</div>
+      <div class="tip"><code>event</code> — delegate maydon ustidagi himoya: tashqi kod faqat
+      <code>+=</code> va <code>-=</code> qila oladi, butun zanjirni <code>null</code>
+      qilib yuborolmaydi.</div>
+
+      <p class="verdict">Delegate — metodga havola, multicast bo'lsa zanjir tartibida
+      chaqiriladi va o'rtada exception chiqsa qolganlari bajarilmaydi. Closure tashqi
+      o'zgaruvchini heap'ga ko'chiradi — <code>for</code> siklida bu klassik xato beradi,
+      lokal nusxa olib hal qilinadi. <code>event</code> ga obuna bo'lgan obyektni
+      <code>-=</code> bilan chiqarmasak xotira sizadi. Domen hodisalarini esa
+      <code>event</code> emas, outbox orqali yuboraman.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/" target="_blank" rel="noopener">Delegates</a> ·
+      <a href="https://learn.microsoft.com/en-us/dotnet/csharp/events-overview" target="_blank" rel="noopener">Events</a></p>
+      `,
     questions:[
       {q:"Closure nima va qanday tuzoq beradi?", a:`
         <p>Lambda tashqi o'zgaruvchini <b>havola bo'yicha</b> ushlaydi — kompilyator yashirin class yaratib, o'zgaruvchini heap'ga ko'chiradi.</p>
@@ -672,36 +823,64 @@ lekin publisher havola ushlab turibdi ─┘
     id:"m1-8", title:"IDisposable va resurslar", hot:true,
     summary:"GC bilmaydigan resurslar, finalizer narxi, HttpClient tuzog'i.",
     lesson:`
-      <pre>┌─────────────────────────┬───────────────────────────┐
+      <p>GC faqat <b>managed xotirani</b> boshqaradi. Fayl deskriptori, DB ulanishi, soket,
+      native xotira va mutex — bularni GC bilmaydi, ularni aniq bo'shatish kerak. Shuning
+      uchun <code>IDisposable</code> bor, <code>using</code> esa uni
+      <code>try/finally</code> ga aylantiradi.</p>
+
+      <pre class="dg">┌─────────────────────────┬───────────────────────────┐
 │  GC boshqaradi          │  GC BILMAYDI              │
 ├─────────────────────────┼───────────────────────────┤
 │  obyekt xotirasi        │  fayl deskriptori         │
-│  massivlar              │  DB ulanishi              │
-│  satrlar                │  soket                    │
-│                         │  native xotira            │
-│                         │  mutex, semafor           │
+│  massivlar, satrlar     │  DB ulanishi, soket       │
+│                         │  native xotira, mutex     │
 └─────────────────────────┴───────────────────────────┘
-                                    │
-                                    ▼
-                              <b>IDisposable</b></pre>
+                                      │
+                                      ▼
+                                <b>IDisposable</b></pre>
+
+      <table>
+        <tr><th>Usul</th><th>Chaqirilishi</th><th>Narx</th></tr>
+        <tr><td>using / Dispose</td><td>Aniq, darhol</td><td>Arzon</td></tr>
+        <tr><td>Finalizer</td><td><b>Kafolatlanmagan</b></td><td>2+ GC sikli</td></tr>
+        <tr><td>await using</td><td>Aniq, asinxron</td><td>Arzon</td></tr>
+      </table>
+
       <pre><b>using var</b> conn = <b>new</b> NpgsqlConnection(cs);
+<i>// Kompilyator: try { ... } finally { conn?.Dispose(); }</i>
 
-<i>// Kompilyator buni shunday yozadi:</i>
-<b>try</b> { ... }
-<b>finally</b> { conn?.Dispose(); }   <s>// exception bo'lsa ham bajariladi</s>
+<i>// TIPIK XATO — using ichidan Task qaytarish</i>
+<b>public</b> Task&lt;<b>int</b>&gt; ReadAsync() {
+    <b>using var</b> f = File.OpenRead(path);
+    <b>return</b> <s>f.ReadAsync(buffer);</s>   <i>// metod tugadi → f Dispose bo'ldi</i>
+}
+<b>public async</b> Task&lt;<b>int</b>&gt; ReadAsync() {
+    <b>using var</b> f = File.OpenRead(path);
+    <b>return</b> <u><b>await</b> f.ReadAsync(buffer);</u>
+}
 
-<b>await using var</b> c = ...;      <i>// IAsyncDisposable</i></pre>
-      <h5>Finalizer nega qimmat</h5>
-      <pre>Finalizer'siz:  Gen0 → yig'iladi → tugadi          (1 sikl)
+<i>// TIPIK XATO — HttpClient ni using bilan</i>
+<b>using var</b> http = <s><b>new</b> HttpClient();</s>   <i>// socket exhaustion</i>
+<u>IHttpClientFactory</u> orqali oling.</pre>
 
-Finalizer'li:   Gen0 → finalization queue
-                     → alohida thread chaqiradi
-                     → keyingi GC siklida yig'iladi   (<u>2+ sikl</u>, Gen1'ga ko'tariladi)
+      <div class="warn"><b>Har so'rovda yangi <code>HttpClient</code> yaratsang</b> →
+      dispose qilingan soket TIME_WAIT da bir necha daqiqa qoladi, portlar tugaydi.</div>
+      <div class="warn"><b>Finalizer yozsang</b> → obyekt Gen1 ga ko'tariladi va ikki GC
+      siklida yig'iladi; chaqirilishi esa kafolatlanmaydi.</div>
+      <div class="warn"><b><code>using</code> ichida <code>await</code> qo'ymasang</b> →
+      resurs task tugamasdan yopiladi.</div>
+      <div class="tip">Tranzaksiya ham <code>IDisposable</code>: <code>Commit</code>
+      chaqirilmasa <code>Dispose</code> avtomatik <b>Rollback</b> qiladi — xavfsiz default.</div>
 
-⚠ Chaqirilishi KAFOLATLANMAGAN — ilova to'xtaganda bo'lmasligi mumkin</pre>
-      <div class="warn"><b>HttpClient ni <code>using</code> bilan ishlatmang.</b> Dispose qilingan soket TIME_WAIT holatida bir necha daqiqa qoladi → portlar tugaydi → <b>socket exhaustion</b>. To'g'ri yechim: <code>IHttpClientFactory</code>.</div>
-      <div class="warn"><b>Async tuzoq:</b> <code>using</code> ichidan <code>Task</code> qaytarish — metod tugagach obyekt darhol Dispose bo'ladi, task esa hali ishlayapti. <code>await</code> qo'shing.</div>
-      <div class="tip">Tranzaksiya <code>IDisposable</code>: <code>Commit</code> chaqirilmasa <code>Dispose</code> avtomatik <b>Rollback</b> qiladi — xavfsiz default.</div>`,
+      <p class="verdict">GC faqat xotirani biladi; fayl, soket va DB ulanishi kabi resurslarni
+      <code>IDisposable</code> orqali o'zim bo'shataman, <code>using</code> esa buni
+      <code>try/finally</code> ga aylantiradi. Finalizer'dan qochaman — u obyektni ikki GC
+      siklida ushlab turadi va chaqirilishi kafolatlanmaydi. <code>HttpClient</code> ni
+      hech qachon <code>using</code> ga o'ramayman, <code>IHttpClientFactory</code>
+      ishlataman.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose" target="_blank" rel="noopener">Implement a Dispose method</a> ·
+      <a href="https://learn.microsoft.com/en-us/dotnet/core/extensions/httpclient-factory" target="_blank" rel="noopener">IHttpClientFactory</a></p>
+      `,
     questions:[
       {q:"IDisposable nima uchun kerak, GC yetarli emasmi?", a:`
         <p>GC faqat <b>boshqariladigan xotirani</b> biladi. Fayl deskriptori, soket, DB ulanishi, native xotira — bular GC uchun ko'rinmas.</p>
@@ -719,31 +898,61 @@ Finalizer'li:   Gen0 → finalization queue
     id:"m1-9", title:"Exception'lar", hot:true,
     summary:"throw vs throw ex, Result naqshi, va ma'lumot sizishi.",
     lesson:`
-      <pre>┌──────────────────────────┬──────────────────────────────┐
-│  KUTILGAN holat          │  KUTILMAGAN holat            │
-├──────────────────────────┼──────────────────────────────┤
-│  Mablag' yetarli emas    │  DB yiqildi                  │
-│  Hisob bloklangan        │  Tarmoq uzildi               │
-│  Limit oshdi             │  Kod invariantida xato       │
-├──────────────────────────┼──────────────────────────────┤
-│  → <b>Result&lt;T&gt;</b>             │  → <b>Exception</b>                 │
-└──────────────────────────┴──────────────────────────────┘</pre>
-      <h5>throw vs throw ex</h5>
-      <pre>throw;                      throw ex;
+      <p>Exception — <b>kutilmagan</b> holat uchun. Biznesda kutilgan rad javobi
+      (mablag' yetarli emas, limit oshdi) exception emas: u tez-tez sodir bo'ladi va
+      stack trace yig'ish qimmatga tushadi. Kutilgan natijani <code>Result</code> bilan,
+      kutilmaganini exception bilan ifodalash kerak.</p>
+
+      <table>
+        <tr><th>Holat</th><th>Misol</th><th>Vosita</th></tr>
+        <tr><td>Kutilgan</td><td>Mablag' yetmadi, limit oshdi</td><td><b>Result&lt;T&gt;</b></td></tr>
+        <tr><td>Kutilmagan</td><td>DB yiqildi, tarmoq uzildi</td><td><b>Exception</b></td></tr>
+        <tr><td>Kod xatosi</td><td>Invariant buzildi</td><td>Exception + alert</td></tr>
+      </table>
+
+      <pre class="dg">throw;                      throw ex;
 ┌────────────────────┐      ┌────────────────────┐
 │ at DbLayer.Save    │      │                    │
-│ at Repo.Insert     │      │   <u>(yo'qoldi)</u>       │
-│ at Service.Charge  │      │                    │
-│ at Controller.Post │      │ at Service.Charge  │ ← faqat shu yerdan
+│ at Repo.Insert     │      │   <s>(yo'qoldi)</s>       │
+│ at Service.Charge  │      │ at Service.Charge  │ ← faqat shu yerdan
 └────────────────────┘      └────────────────────┘
-  xato QAYERDAN kelgani       manba YO'QOLGAN
-  ko'rinadi</pre>
-      <pre><b>catch</b> (SqlException ex) <b>when</b> (ex.Number == 1205) {   <i>// FILTER</i>
+  manba ko'rinadi             manba YO'QOLGAN</pre>
+
+      <pre><i>// TIPIK XATO — stack trace ni o'chirish</i>
+<b>catch</b> (Exception ex) { Log(ex); <s><b>throw</b> ex;</s> }
+<b>catch</b> (Exception ex) { Log(ex); <u><b>throw</b>;</u> }
+
+<i>// Exception filter — stack hali yechilmagan</i>
+<b>catch</b> (SqlException ex) <b>when</b> (ex.Number == 1205) {
     <i>// deadlock — retry</i>
-}</pre>
-      <p><b>Filter'ning muhim afzalligi:</b> shart <code>false</code> bo'lsa stack <b>hali yechilmagan</b> — debugger xato paydo bo'lgan joyni ko'rsatadi. <code>catch</code> ichida <code>if</code> yozilsa stack allaqachon yechilgan bo'ladi.</p>
-      <div class="warn"><b>Client'ga <code>ex.Message</code> qaytarmang.</b> «Invalid column name 'card_number' in table 'user_cards'» — ichki tuzilma tashqariga chiqdi. <code>ProblemDetails</code> + <code>traceId</code> bering, batafsil ma'lumot logda qolsin.</div>
-      <div class="tip">Fintech'da to'lov xatosi log'ga <b>albatta tranzaksiya ID bilan</b> yoziladi. «Nimadir xato ketdi» degan log — foydasiz.</div>`,
+}
+
+<i>// TIPIK XATO — ichki ma'lumotni tashqariga chiqarish</i>
+<b>return</b> BadRequest(<s>ex.Message</s>);
+<i>// "Invalid column name 'card_number' in table 'user_cards'"</i>
+<b>return</b> <u>Problem(detail: "So'rov bajarilmadi", instance: traceId);</u></pre>
+
+      <p>Filter'ning afzalligi: shart <code>false</code> bo'lsa stack <b>hali
+      yechilmagan</b> — debugger xato paydo bo'lgan joyni ko'rsatadi. <code>catch</code>
+      ichida <code>if</code> yozilsa stack allaqachon yechilgan bo'ladi.</p>
+
+      <div class="warn"><b><code>throw ex;</code> yozsang</b> → stack trace shu qatordan
+      qayta boshlanadi va xato qayerdan kelgani yo'qoladi.</div>
+      <div class="warn"><b>Client'ga <code>ex.Message</code> qaytarsang</b> → ichki jadval va
+      ustun nomlari tashqariga chiqadi.</div>
+      <div class="warn"><b>Kutilgan rad javobini exception qilsang</b> → issiq yo'lda
+      stack trace yig'ish sekinlashtiradi va log shovqinga to'ladi.</div>
+      <div class="tip">To'lov xatosi log'ga albatta <b>tranzaksiya ID bilan</b> yoziladi.
+      «Nimadir xato ketdi» degan log foydasiz.</div>
+
+      <p class="verdict">Exception'ni kutilmagan holatlarga qoldiraman: DB yiqilishi,
+      tarmoq uzilishi, buzilgan invariant. Biznesda kutilgan rad javobi
+      <code>Result</code> bilan qaytadi, chunki u tez-tez uchraydi va exception qimmat.
+      Qayta tashlashda <code>throw;</code> yozaman — <code>throw ex;</code> stack trace ni
+      yo'qotadi. Tashqariga esa <code>ProblemDetails</code> va <code>traceId</code>
+      chiqadi, batafsil ma'lumot logda qoladi.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions" target="_blank" rel="noopener">Best practices for exceptions</a></p>
+      `,
     questions:[
       {q:"throw va throw ex farqi nima?", a:`
         <p><code>throw;</code> mavjud exception'ni <b>original stack trace bilan</b> uzatadi. <code>throw ex;</code> stack trace'ni shu qatordan qayta boshlaydi — xato manbai yo'qoladi.</p>
@@ -760,6 +969,20 @@ Finalizer'li:   Gen0 → finalization queue
     id:"m1-10", title:"Pattern matching",
     summary:"switch expression, to'liqlik tekshiruvi, holatlar mashinasi.",
     lesson:`
+      <p><code>switch</code> expression qiymat qaytaradi va naqshlar <b>yuqoridan pastga</b>
+      tekshiriladi — birinchi mos kelgani yutadi. Enum yoki yopiq ierarxiya ustida
+      yozilganda kompilyator <b>to'liqlikni</b> tekshiradi: qamralmagan holat qolsa
+      ogohlantirish beradi. Bu yangi enum qiymati qo'shilganda tuzatish kerak bo'lgan
+      joylarni o'zi ko'rsatadi.</p>
+
+      <table>
+        <tr><th>Naqsh turi</th><th>Misol</th></tr>
+        <tr><td>Property</td><td>{ Amount.Minor: &lt;= 100_000 }</td></tr>
+        <tr><td>Relational + logical</td><td>&gt; 0 and &lt;= 100_000</td></tr>
+        <tr><td>Tuple</td><td>(true, false) =&gt; ...</td></tr>
+        <tr><td>Type</td><td>Payment p =&gt; ...</td></tr>
+      </table>
+
       <pre><b>decimal</b> Fee(Payment p) =&gt; p <b>switch</b> {
     { Amount.Minor: &lt;= 100_000 }                =&gt; 0m,
     { Type: PaymentType.Card, IsForeign: <b>true</b> } =&gt; p.Amount.ToMajor() * 0.035m,
@@ -767,30 +990,36 @@ Finalizer'li:   Gen0 → finalization queue
     _                                           =&gt; <b>throw new</b> NotSupportedException()
 };
 
-<i>// Relational + logical</i>
-minor <b>switch</b> {
-    &lt; 0                          =&gt; <i>"noto'g'ri"</i>,
-    &gt; 0 <b>and</b> &lt;= 100_000            =&gt; <i>"kichik"</i>,
-    _                            =&gt; <i>"katta"</i>
-};
-
-<i>// Tuple pattern</i>
-(hasBalance, isBlocked) <b>switch</b> {
-    (<b>true</b>,  <b>false</b>) =&gt; <i>"ruxsat"</i>,
-    (<b>true</b>,  <b>true</b>)  =&gt; <i>"hisob bloklangan"</i>,
-    (<b>false</b>, _)     =&gt; <i>"mablag' yetarli emas"</i>
+<i>// TIPIK XATO — umumiy naqsh xususiydan oldin turibdi</i>
+p <b>switch</b> {
+    <s>{ Type: PaymentType.Card }                  =&gt; 0.02m,</s>
+    <s>{ Type: PaymentType.Card, IsForeign: true } =&gt; 0.035m</s>  <i>// hech qachon</i>
 };</pre>
-      <h5>Fintech: holatlar mashinasi</h5>
+
       <pre>PaymentState Next(PaymentState s, PaymentEvent e) =&gt; (s, e) <b>switch</b> {
     (Pending,    Authorized)   =&gt; Processing,
     (Processing, Succeeded)    =&gt; Completed,
     (Processing, Failed)       =&gt; Failed,
-    (Processing, TimedOut)     =&gt; <b>Unknown</b>,      <u>// ⚠ fail EMAS</u>
+    (Processing, TimedOut)     =&gt; <u>Unknown</u>,      <i>// fail EMAS</i>
     (Unknown,    Reconciled r) =&gt; r.WasCharged ? Completed : Failed,
     _ =&gt; <b>throw new</b> InvalidTransitionException(s, e)
 };</pre>
-      <div class="tip"><b>To'liqlik tekshiruvi:</b> enum'ga yangi qiymat qo'shsangiz, uni qamramaydigan barcha <code>switch</code> expression ogohlantirish beradi — kompilyator tuzatish kerak bo'lgan joylarni ko'rsatadi.</div>
-      <div class="warn"><code>_</code> (discard) ni ehtiyotkorlik bilan ishlating — u to'liqlikni «yopib» qo'yadi va shu foydani yo'qotadi. Va naqshlar tartibi muhim: umumiy naqsh xususiyni yutadi.</div>`,
+
+      <div class="warn"><b>Naqshlarni noto'g'ri tartibda yozsang</b> → umumiy naqsh xususiyni
+      yutadi va u hech qachon bajarilmaydi.</div>
+      <div class="warn"><b>Hamma joyda <code>_</code> qo'ysang</b> → to'liqlik tekshiruvi
+      o'chadi va yangi enum qiymati jimgina default'ga tushadi.</div>
+      <div class="warn"><b>To'lovda timeout'ni Failed deb belgilasang</b> → pul yechilgan
+      bo'lishi mumkin. To'g'ri holat — <code>Unknown</code>, keyin reconciliation.</div>
+
+      <p class="verdict"><code>switch</code> expression naqshlarni tartib bilan tekshiradi,
+      shuning uchun xususiy holat umumiydan oldin turishi kerak. Uning eng katta foydasi —
+      to'liqlik tekshiruvi: enum'ga yangi qiymat qo'shilsa kompilyator tuzatish kerak
+      bo'lgan barcha joyni ko'rsatadi. Shuning uchun <code>_</code> ni ehtiyot bo'lib
+      ishlataman — u shu foydani o'chiradi. Holatlar mashinasini tuple pattern bilan
+      yozaman, noto'g'ri o'tish esa exception beradi.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/patterns" target="_blank" rel="noopener">Pattern matching</a></p>
+      `,
     questions:[
       {q:"Pattern matching polimorfizmni almashtiradimi?", a:`
         <p>Yo'q. Xatti-harakat turga bog'liq va turlar kengayib borsa — <b>polimorfizm</b> to'g'ri (<code>IPaymentProvider</code>).</p>
@@ -801,30 +1030,59 @@ minor <b>switch</b> {
     id:"m1-11", title:"Extension, static ctor, partial",
     summary:"Kompilyator nima qiladi va static konstruktorning xavfi.",
     lesson:`
+      <p>Extension metod — sintaksis qulaylik: kompilyator <code>a.Foo(b)</code> ni
+      <code>Helper.Foo(a, b)</code> ga aylantiradi. Shuning uchun u <code>null</code>
+      obyektda ham chaqiriladi, <code>private</code> a'zolarga kira olmaydi va haqiqiy
+      instance metod har doim ustun turadi. Namespace import qilinmasa metod
+      umuman ko'rinmaydi.</p>
+
       <pre><b>public static class</b> MoneyExtensions {
     <b>public static</b> Money Percent(<b>this</b> Money src, <b>decimal</b> pct) =&gt; ...;
 }
+<i>// Kompilyator: MoneyExtensions.Percent(payment.Amount, 2.5m)</i>
 
-<i>// Kompilyator buni oddiy statik chaqiruvga aylantiradi:</i>
-MoneyExtensions.Percent(payment.Amount, 2.5m)</pre>
-      <p>Xususiyatlari: <code>null</code> obyektda ham chaqiriladi (<code>this</code> tekshirilmaydi) · namespace import qilinmasa <b>ko'rinmaydi</b> · haqiqiy instance metod har doim <b>ustun</b> · <code>private</code> a'zolarga kira olmaydi.</p>
-      <h5>Static konstruktor</h5>
-      <pre>Qachon chaqiriladi:
-┌────────────────────────────────────────────┐
-│  Sinfning BIRINCHI ishlatilishidan oldin   │
-│  · Aynan BIR MARTA                          │
-│  · Thread-safe — CLR kafolatlaydi           │
-│  · Chaqiruv vaqti ANIQ EMAS (lazy)          │
-└────────────────────────────────────────────┘</pre>
-      <div class="warn"><b>Static konstruktorda exception</b> chiqsa, CLR uni <code>TypeInitializationException</code> ga o'raydi va sinf <b>butun ilova umriga ishlatilmaydigan</b> bo'lib qoladi. U yerda I/O yoki konfiguratsiya o'qish qilinmaydi.</div>
-      <pre><i>// partial — generatsiya qilingan kod + qo'lda yozilgan kodni ajratish</i>
+<i>// TIPIK XATO — extension null tekshirmaydi</i>
+<b>public static bool</b> IsEmpty(<b>this string</b> s) =&gt; <s>s.Length == 0;</s>
+<b>public static bool</b> IsEmpty(<b>this string</b>? s) =&gt; <u>s <b>is null</b> || s.Length == 0;</u></pre>
+
+      <table>
+        <tr><th>Xususiyat</th><th>Static ctor</th></tr>
+        <tr><td>Qachon</td><td>Sinf birinchi ishlatilishidan oldin</td></tr>
+        <tr><td>Necha marta</td><td>Aynan bir marta</td></tr>
+        <tr><td>Thread-safety</td><td>CLR kafolatlaydi</td></tr>
+        <tr><td>Aniq vaqti</td><td><b>Noma'lum — lazy</b></td></tr>
+      </table>
+
+      <pre><i>// TIPIK XATO — static ctor ichida I/O</i>
+<b>static</b> Config() { <s>_settings = File.ReadAllText("app.json");</s> }
+<i>// Fayl topilmasa TypeInitializationException, va sinf butun ilova</i>
+<i>// umriga ishlatilmaydigan bo'lib qoladi</i>
+
+<i>// partial — generatsiya qilingan va qo'lda yozilgan kodni ajratadi</i>
 <b>public partial class</b> PaymentService {
-    [LoggerMessage(Level = LogLevel.Information,
-                   Message = <i>"To'lov bajarildi {PaymentId}"</i>)]
+    [LoggerMessage(Level = LogLevel.Information, Message = "To'lov bajarildi {PaymentId}")]
     <b>private partial void</b> LogCompleted(Guid paymentId);
     <i>// implementatsiyani source generator yozadi — allocation'siz</i>
 }</pre>
-      <div class="tip">Extension'lar — <b>yordamchi</b> metodlar uchun. Domen qoidalari va invariant himoyasi turning <b>ichida</b> bo'lishi kerak.</div>`,
+
+      <div class="warn"><b>Static konstruktorda exception chiqsa</b> → CLR uni
+      <code>TypeInitializationException</code> ga o'raydi va sinf butun ilova umriga
+      yaroqsiz bo'lib qoladi.</div>
+      <div class="warn"><b>Extension ichida <code>this</code> ni tekshirmasang</b> →
+      <code>null</code> da chaqirilganda <code>NullReferenceException</code> chiqadi,
+      chunki bu oddiy statik chaqiruv.</div>
+      <div class="tip">Extension — yordamchi metodlar uchun. Domen qoidalari va invariant
+      himoyasi turning ichida bo'lishi kerak.</div>
+
+      <p class="verdict">Extension metod — sintaksis shakar: kompilyator uni oddiy statik
+      chaqiruvga aylantiradi, shuning uchun <code>null</code> da ham chaqiriladi va
+      <code>private</code> a'zolarga kirmaydi. Static konstruktor bir marta va thread-safe
+      ishlaydi, lekin qachon ishga tushishi aniq emas — shuning uchun unda I/O yoki
+      konfiguratsiya o'qishni yozmayman, xato chiqsa sinf butunlay yaroqsiz bo'lib qoladi.
+      <code>partial</code> esa asosan source generator kodini ajratish uchun kerak.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/extension-methods" target="_blank" rel="noopener">Extension methods</a> ·
+      <a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/static-constructors" target="_blank" rel="noopener">Static constructors</a></p>
+      `,
     questions:[
       {q:"Static konstruktor qachon chaqiriladi?", a:`
         <p>Sinfning birinchi ishlatilishidan oldin, aynan bir marta. CLR thread-safe ekanini kafolatlaydi.</p>
@@ -835,41 +1093,65 @@ MoneyExtensions.Percent(payment.Amount, 2.5m)</pre>
     id:"m1-12", title:"Operator overloading va value object",
     summary:"Money uchun to'liq implementatsiya — va nega bo'lish operatori yo'q.",
     lesson:`
+      <p>Value object — kimligi yo'q, <b>qiymati bilan aniqlanadigan</b> tur: 1000 UZS
+      har doim 1000 UZS. Operator overloading uni tabiiy o'qiladigan qiladi, lekin har
+      operator qo'shilganda savol tug'iladi: bu amalning <b>yagona to'g'ri</b> ma'nosi
+      bormi. Bo'lmasa — operator yozilmaydi.</p>
+
       <pre><b>public readonly record struct</b> Money : IComparable&lt;Money&gt;
 {
     <b>public long</b> Minor { get; }
     <b>public</b> Currency Currency { get; }
 
     <b>public static</b> Money <b>operator</b> +(Money a, Money b) =&gt;
-        <b>new</b>(<b>checked</b>(a.Minor + b.Minor), Same(a, b));
+        <b>new</b>(<u><b>checked</b></u>(a.Minor + b.Minor), Same(a, b));
 
-    <b>public static</b> Money <b>operator</b> -(Money a, Money b) =&gt;
-        <b>new</b>(<b>checked</b>(a.Minor - b.Minor), Same(a, b));
+    <b>public static bool operator</b> &gt;(Money a, Money b) =&gt; a.Minor &gt; Same(a, b).Minor;
 
-    <b>public static bool operator</b> &gt;(Money a, Money b) =&gt; a.Minor &gt; Same(a,b).Minor;
-
-    <i>// ⚠ operator / ATAYLAB YO'Q — qoldiq siyosati talab qilinadi</i>
+    <i>// operator / ATAYLAB YO'Q — qoldiq siyosati talab qilinadi</i>
 
     <b>private static</b> Currency Same(Money a, Money b) =&gt;
         a.Currency == b.Currency ? a.Currency
-        : <b>throw new</b> InvalidOperationException(<i>"Valyuta mos emas"</i>);
-}</pre>
-      <pre>Nima ATAYLAB qilinmagan:
-┌──────────────────────────────────────────────────────────┐
-│  <u>✗ operator /</u>       → qoldiq siyosati kerak (M4.5)     │
-│  <u>✗ Money + decimal</u>  → valyuta noaniq qoladi           │
-│  <u>✗ implicit cast</u>    → tasodifiy konvertatsiya xavfli  │
-│  <u>✗ mutable maydon</u>   → value object immutable bo'lsin  │
-└──────────────────────────────────────────────────────────┘</pre>
-      <h5>Value object qoidalari</h5>
+        : <b>throw new</b> InvalidOperationException("Valyuta mos emas");
+}
+
+<i>// TIPIK XATO — checked'siz qo'shish</i>
+<b>new</b>(<s>a.Minor + b.Minor</s>, ...)   <i>// overflow jimgina manfiy songa aylanadi</i></pre>
+
       <table>
-        <tr><th>Qoida</th><th>Nega</th></tr>
+        <tr><th>Ataylab qilinmagan</th><th>Sabab</th></tr>
+        <tr><td>operator /</td><td>Qoldiq siyosati kerak</td></tr>
+        <tr><td>Money + decimal</td><td>Valyuta noaniq qoladi</td></tr>
+        <tr><td>implicit cast</td><td>Tasodifiy konvertatsiya</td></tr>
+        <tr><td>mutable maydon</td><td>Value object immutable</td></tr>
+      </table>
+
+      <table>
+        <tr><th>Value object qoidasi</th><th>Nega</th></tr>
         <tr><td>Immutable</td><td>Ulashilgan holat xavfsiz</td></tr>
-        <tr><td>Qiymat bo'yicha tenglik</td><td>1000 UZS = 1000 UZS, ID kerak emas</td></tr>
-        <tr><td>O'z-o'zini tekshiradi</td><td>Noto'g'ri holatda yaratib bo'lmaydi</td></tr>
+        <tr><td>Qiymat bo'yicha tenglik</td><td>ID kerak emas</td></tr>
+        <tr><td>O'zini tekshiradi</td><td>Noto'g'ri holat yaratilmaydi</td></tr>
         <tr><td>Kichik</td><td>readonly record struct — allocation yo'q</td></tr>
       </table>
-      <div class="tip"><b>Tur xavfsizligi:</b> <code>Charge(AccountNumber from, AccountNumber to, Money amount)</code> — argumentlarni tasodifan almashtirib bo'lmaydi. <code>Charge(string, string, decimal)</code> da esa oson.</div>`,
+
+      <div class="warn"><b>Valyutani tekshirmasdan qo'shsang</b> → 100 USD + 100 UZS = 200
+      degan natija chiqadi va xato hisobotgacha bilinmaydi.</div>
+      <div class="warn"><b><code>checked</code> yozmasang</b> → overflow exception bermaydi,
+      son jimgina aylanib manfiy bo'ladi.</div>
+      <div class="warn"><b><code>implicit</code> konvertatsiya qo'shsang</b> →
+      <code>decimal</code> tasodifan Money'ga aylanadi va valyuta yo'qoladi.</div>
+      <div class="tip"><code>Charge(AccountNumber from, AccountNumber to, Money amount)</code> —
+      argumentlarni almashtirib bo'lmaydi. <code>Charge(string, string, decimal)</code> da esa oson.</div>
+
+      <p class="verdict">Money — kimligi yo'q, qiymati bilan aniqlanadigan tur, shuning uchun
+      <code>readonly record struct</code> qilaman: immutable, qiymat bo'yicha teng va
+      allocation yo'q. Qo'shish va solishtirishda valyuta mosligini tekshiraman va
+      <code>checked</code> ishlataman. Bo'lish operatorini ataylab yozmayman — qoldiqni
+      kimga berish biznes qarori. <code>decimal</code> bilan aralash operatorlar ham yo'q,
+      chunki ular valyutani yo'qotadi.</p>
+      <p class="source">Manba: <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/operator-overloading" target="_blank" rel="noopener">Operator overloading</a> ·
+      <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/checked-and-unchecked" target="_blank" rel="noopener">checked and unchecked</a></p>
+      `,
     questions:[
       {q:"Nega Money uchun bo'lish operatorini yozmadingiz?", a:`
         <p>Pulni bo'lish <b>qoldiq siyosatini</b> talab qiladi. <code>100 / 3</code> — bu 33.33 emas, bu 34/33/33 va oshgan tiyin kimgadir tegishi kerak.</p>
@@ -4683,22 +4965,10 @@ Balans sahifasini ochdi.
     id:"m10-5", title:"Transactional Outbox", hot:true,
     summary:"Bir tranzaksiyada ikkalasi. Fintechda deyarli majburiy.",
     lesson:`
-      <pre>┌── BITTA TRANZAKSIYA ──────────────┐
-│  INSERT INTO payments (...)       │
-│  INSERT INTO outbox   (...)       │
-│  COMMIT                           │
-└───────────────┬───────────────────┘
-                │
-     ┌──────────▼───────────┐
-     │  Publisher (fon)     │  har 1 soniya
-     │  SELECT ... WHERE    │
-     │    published_at NULL │
-     │  FOR UPDATE          │
-     │  SKIP LOCKED         │  ⚠ ko'p instans uchun
-     │  LIMIT 100           │
-     └──────────┬───────────┘
-                ▼
-             BROKER  → published_at = now()</pre>
+      <div data-d2="outbox">Brokerga yozish tranzaksiya <b>ichida emas</b> — shuning uchun
+      «commit o'tdi, xabar ketmadi» holati bo'lishi mumkin emas: xabar ham o'sha bazaga,
+      o'sha tranzaksiyada tushadi. <b>SKIP LOCKED</b> esa bir nechta relay instansi bir
+      xil qatorni ikki marta yubormasligini ta'minlaydi.</div>
       <pre><b>CREATE TABLE</b> outbox (
     id            bigserial <b>PRIMARY KEY</b>,
     aggregate_id  uuid        <b>NOT NULL</b>,

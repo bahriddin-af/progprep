@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "content": "node scripts/build-content.mjs",
+    "content": "node scripts/build-diagrams.mjs && node scripts/build-content.mjs",
     "dev": "npm run content && next dev",
     "build": "npm run content && next build",
     "start": "next start",
@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "@terrastruct/d2": "^0.1.33",
     "@types/node": "22.10.7",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
