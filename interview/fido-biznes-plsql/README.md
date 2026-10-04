@@ -20,16 +20,34 @@ Java: Tomcat · Servlet · JSP · sessions, application lifecycle
 | 4 | [04-exception.md](04-exception.md) | Exception'lar, `RAISE_APPLICATION_ERROR` | ✅ |
 | 5 | [05-collection-bulk-forall.md](05-collection-bulk-forall.md) | Collection, `BULK COLLECT`, `FORALL`, `LIMIT` | ✅ |
 | 6 | [06-trigger.md](06-trigger.md) | Trigger, `:NEW/:OLD`, mutating table | ✅ |
-| 7 | [07-acid.md](07-acid.md) | ACID: **A, C, I** o'tildi, **D** qoldi | 🟡 |
+| 7 | [07-acid.md](07-acid.md) | ACID: A, C, I, D · Redo vs UNDO (I va A farqi, D Telegram misoli bilan chatda o'tildi) | ✅ |
 | 8 | [08-tezkor-takrorlash.md](08-tezkor-takrorlash.md) | Indeks, jobs, HTTPS, hash, auth, Java servlet | ✅ |
 | 9 | [09-qoshimcha-savollar.md](09-qoshimcha-savollar.md) | Intervyuerning kutiladigan qo'shimcha savollari | ✅ |
+| 10 | [10-table-tablespace.md](10-table-tablespace.md) | Table, tablespace, datafile, schema, buffer cache | ✅ |
+| 11 | [11-indekslar.md](11-indekslar.md) | Indeks, ROWID, DML narxi, 5 tur (B-tree, Unique, Composite, Function-based, Bitmap) | 🟡 3-qism qoldi |
 | — | [mock-intervyu.md](mock-intervyu.md) | Mock intervyu: savollar, ballar, qayerda to'xtadik | 🟡 |
+
+## Oracle SQL mavzular ro'yxati (bittadan o'tiladi)
+
+1. ✅ Table, tablespace → [10](10-table-tablespace.md)
+2. 🟡 Index, index turlari, qayerda qanday index → [11](11-indekslar.md) (1, 2-qism ✅; **3-qism: indeks qachon ishlamaydi** qoldi)
+3. Oracle SQL type'lar: NUMBER, VARCHAR2, DATE
+4. Join'lar, turlari, qayerda qanday join
+5. ACID misollar bilan
+6. Tranzaksiya, sessiya
+7. COMMIT, ROLLBACK, SAVEPOINT
+8. Redo, UNDO log'lar
+9. Deadlock
+10. Partition'lar
 
 ## Keyingi qadamlar
 
-1. **07-acid.md** → **D (Durability)** darsi, keyin ACID'ni to'liq o'z so'zim bilan aytish
-2. Mock intervyuni davom ettirish (3-savol: ACID, keyin indekslar, background jobs)
-3. Hali o'tilmagan: Transaction/Locking/**Deadlock**, SQL amaliyot (JOIN, analytic), Dynamic SQL, View/MView, normalizatsiya
+**Shu yerda to'xtadik (2026-10-04):** indeks 3-qism (qachon ishlamaydi), keyin 3-mavzu: type'lar. Format: Claude bitta mavzuni tushuntiradi → men o'z so'zim bilan yozaman → baho.
+
+1. [11-indekslar.md](11-indekslar.md) → 3-qism: indeks qachon ishlamaydi; javob berilmagan tekshiruv savollari
+2. ACID va "Tranzaksiya nima?" ga o'z so'zim bilan javob (mock 3-savol qayta)
+3. Mock intervyuni davom ettirish (3-savol: ACID, keyin indekslar, background jobs)
+4. Hali o'tilmagan: Transaction/Locking/**Deadlock**, SQL amaliyot (JOIN, analytic), Dynamic SQL, View/MView, normalizatsiya
 
 ## Dushanba ertalab o'qiladigan kartochka
 

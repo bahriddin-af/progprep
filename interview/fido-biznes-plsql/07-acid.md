@@ -1,4 +1,4 @@
-# 7 · ACID (A, C, I o'tildi · D keyingi)
+# 7 · ACID
 
 **Tranzaksiya** = bir butun deb qaraladigan amallar guruhi. Ali → Vali 100 ming:
 
@@ -216,7 +216,82 @@ SET TRANSACTION READ ONLY;
 
 ## D · Durability
 
-⏳ Keyingi darsda. Qisqasi: `COMMIT` paytida o'zgarish **redo log**ga (diskka) yoziladi, server qulab tushsa ham instance recovery'da tiklanadi.
+Kassirning **chek daftari** kabi: pul berilgach, yozuv daftarga tushadi. Kassa kompyuteri buzilsa ham daftar bo'yicha hammasi tiklanadi.
+
+**COMMIT** = "Commit complete" qaytdi → o'zgarish **yo'qolmaydi** (svet o'chsa, server qulasa ham).
+
+### COMMIT paytida nima bo'ladi?
+
+```
+ UPDATE ALI -100k
+   ├─ Buffer cache (xotira)    : blok o'zgardi        ← data file'ga hali YOZILMAGAN
+   ├─ UNDO                     : eski qiymat 500 000
+   └─ Redo log buffer (xotira) : "ALI -100k" yozuvi
+
+ COMMIT
+   └─ LGWR → redo log buffer'ni DISKdagi online redo log faylga yozadi
+      ✅ yozib bo'lgach, ilovaga "Commit complete" qaytadi
+
+ Keyinroq (o'z vaqtida)
+   └─ DBWn → o'zgargan bloklarni data file'larga yozadi
+```
+
+**Asosiy fikr:** COMMIT data file'ni kutmaydi, faqat **redo**ni diskka yozadi.
+
+| Savol | Javob |
+|---|---|
+| Nega data file emas, redo? | Redo kichik va **ketma-ket** (sequential) yoziladi, tez. Data bloklar diskning turli joylarida (random I/O), sekin |
+| Data file'ga yozilmagan, svet o'chdi? | Redo diskda bor → qayta tiklanadi |
+| Kim yozadi? | **LGWR** (Log Writer) redo'ni · **DBWn** (Database Writer) data bloklarni |
+
+### Svet o'chdi → Instance recovery (SMON)
+
+```
+ Redo log:  Tx #1: ALI -100k, VALI +100k, COMMIT ✅
+            Tx #2: SOLI -50k ...              (COMMIT yo'q)
+
+ Server yondi → SMON:
+   1. Roll forward : redo'dagi o'zgarishlarni qayta qo'llaydi     → Tx #1 tiklandi (Durability)
+   2. Roll back    : commit bo'lmaganini UNDO bilan bekor qiladi  → Tx #2 bekor (Atomicity)
+```
+
+### Redo va UNDO farqi (ko'p so'raladi!)
+
+| | **Redo** | **UNDO** |
+|---|---|---|
+| Nimani saqlaydi | **Yangi** qiymat (nima qilindi) | **Eski** qiymat (oldin nima edi) |
+| Maqsad | Qayta **bajarish** (tiklash) | **Bekor** qilish, eski versiyani o'qish |
+| ACID | **D** | **A**, **I** (read consistency) |
+| Qayerda | Online redo log fayllar | UNDO tablespace |
+
+### Disk buzilsa? (media failure)
+
+Svet o'chishi bir narsa, disk butunlay buzilishi boshqa. Bankda qo'shimcha himoya:
+
+| Himoya | Nima qiladi |
+|---|---|
+| **Multiplexing** | Har redo log guruhida 2+ nusxa, turli disklarda |
+| **ARCHIVELOG** rejimi | To'lgan redo log'lar arxivlanadi (ARCn), ustidan yozilmaydi |
+| **RMAN backup** | Backup + arxiv log'lar → istalgan vaqtga tiklash |
+| **Data Guard** | Boshqa joydagi zaxira (standby) baza, redo u yerga ham yuboriladi |
+
+### Durability'ni kuchsizlantirish (bankda ishlatilmaydi)
+
+```sql
+COMMIT WRITE BATCH NOWAIT;   -- LGWR'ni kutmaydi → tez, lekin crash'da oxirgi commit yo'qolishi mumkin
+```
+
+Default `COMMIT` = `WRITE IMMEDIATE WAIT` → to'liq durability. Pul bilan ishlashda faqat shu.
+
+> "Durability commit qilingan ma'lumot server qulab tushsa ham yo'qolmasligini anglatadi. Oracle'da COMMIT paytida LGWR redo log'ni diskka yozadi va shundan keyingina 'commit complete' qaytadi. Data file'larni keyinroq DBWn yozadi. Svet o'chsa, instance recovery'da SMON redo'ni qayta qo'llaydi, commit bo'lmaganini UNDO bilan bekor qiladi. Disk buzilishidan redo multiplexing, ARCHIVELOG, RMAN backup va Data Guard himoya qiladi. Masalan, Ali Vali'ga 100 ming o'tkazdi, commit bo'ldi va shu soniyada svet o'chdi: server yonganda o'tkazma joyida bo'ladi."
+
+---
+
+## ACID to'liq javob (30 soniya)
+
+> "ACID tranzaksiyaning 4 xususiyati. **Atomicity**: hammasi yoki hech narsa, Oracle UNDO bilan bekor qiladi. **Consistency**: constraint'lar bazani to'g'ri holatda saqlaydi, masalan qoldiq manfiy bo'lmaydi. **Isolation**: parallel tranzaksiyalar bir-birining commit qilinmagan o'zgarishini ko'rmaydi, Oracle'da default READ COMMITTED, lock va UNDO bilan. **Durability**: commit'dan keyin ma'lumot yo'qolmaydi, chunki redo log diskka yoziladi. Bank misolida: Ali Vali'ga pul o'tkazsa, yo ikkala amal bajariladi, yo hech biri; qoldiq manfiy bo'lmaydi; boshqalar yarim o'tkazmani ko'rmaydi; commit bo'lgach svet o'chsa ham pul joyida."
+
+---
 
 ## Tekshiruv savollari
 
@@ -225,5 +300,8 @@ SET TRANSACTION READ ONLY;
 3. Session 1 commit qilmadi, Session 2 SELECT qildi: qaysi qiymat va qayerdan?
 4. Lost update nima va qanday oldini olasiz?
 5. Oracle'ning default isolation darajasi?
+6. COMMIT paytida diskka nima yoziladi? Data file'lar qachon yoziladi?
+7. Redo va UNDO farqi?
+8. Svet o'chdi: SMON qaysi 2 qadamni bajaradi?
 
 **Manba:** [Data Concurrency and Consistency](https://docs.oracle.com/en/database/oracle/oracle-database/19/cncpt/data-concurrency-and-consistency.html)

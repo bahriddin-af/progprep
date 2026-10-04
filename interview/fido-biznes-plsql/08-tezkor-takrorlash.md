@@ -5,13 +5,14 @@
 Kitob mundarijasi kabi: indekssiz = **Full Table Scan**, indeks bilan = ROWID orqali to'g'ri qatorga.
 
 ```
-                      [ Root: 500 ]
-                     /              \
-          [Branch: 250]            [Branch: 750]
-          /         \              /          \
-  [Leaf: 1..249] [Leaf: 250..499] [500..749] [Leaf: 750..999]
-       └─ 101 → ROWID
+ Root:    [ 1..250 | 251..500 | 501..750 | ... ]                    ← yuzlab bo'lak
+              │
+ Branch:  [ 1..10 | 11..20 | ... | 101..110 | ... | 241..250 ]      ← yuzlab bo'lak
+                                     │
+ Leaf:    [ 101→ROWID | 102→ROWID | ... | 110→ROWID ]               ← yuzlab qiymat
 ```
+
+**Binary tree emas:** har tugun = 1 blok (8 KB), unda yuzlab qiymat → daraxt past.
 
 Saralangan · 1 mln qatorda 3–4 qadam · leaf'da qiymat + ROWID · leaf'lar bog'langan (`BETWEEN` tez).
 

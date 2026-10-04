@@ -12,7 +12,7 @@
 
 ## Keyingi qadam
 
-1. D (Durability) darsi
+1. I (Isolation) va D (Durability) darslari
 2. 3-savolga qayta javob: ACID to'liq
 3. Davomi: indekslar, background jobs savollari
 
