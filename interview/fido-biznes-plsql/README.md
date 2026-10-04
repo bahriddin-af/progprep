@@ -24,25 +24,29 @@ Java: Tomcat · Servlet · JSP · sessions, application lifecycle
 | 8 | [08-tezkor-takrorlash.md](08-tezkor-takrorlash.md) | Indeks, jobs, HTTPS, hash, auth, Java servlet | ✅ |
 | 9 | [09-qoshimcha-savollar.md](09-qoshimcha-savollar.md) | Intervyuerning kutiladigan qo'shimcha savollari | ✅ |
 | 10 | [10-table-tablespace.md](10-table-tablespace.md) | Table, tablespace, datafile, schema, buffer cache | ✅ |
-| 11 | [11-indekslar.md](11-indekslar.md) | Indeks, ROWID, DML narxi, 5 tur (B-tree, Unique, Composite, Function-based, Bitmap) | 🟡 3-qism qoldi |
+| 11 | [11-indekslar.md](11-indekslar.md) | Indeks, ROWID, DML narxi, 5 tur (B-tree, Unique, Composite, Function-based, Bitmap) | ✅ |
+| 12 | [12-type-lar.md](12-type-lar.md) | NUMBER, VARCHAR2, DATE, TIMESTAMP | ✅ |
+| 13 | [13-join-lar.md](13-join-lar.md) | INNER, LEFT, RIGHT, FULL, CROSS, SELF, EXISTS, NOT IN tuzog'i | ✅ |
+| 14 | [14-tranzaksiya-sessiya.md](14-tranzaksiya-sessiya.md) | Sessiya, V$SESSION, tranzaksiya boshlanishi/tugashi, JDBC autocommit | ✅ |
+| 15 | [15-commit-rollback-savepoint.md](15-commit-rollback-savepoint.md) | COMMIT ichida, statement-level rollback, SAVEPOINT, qachon commit | ✅ |
 | — | [mock-intervyu.md](mock-intervyu.md) | Mock intervyu: savollar, ballar, qayerda to'xtadik | 🟡 |
 
 ## Oracle SQL mavzular ro'yxati (bittadan o'tiladi)
 
 1. ✅ Table, tablespace → [10](10-table-tablespace.md)
-2. 🟡 Index, index turlari, qayerda qanday index → [11](11-indekslar.md) (1, 2-qism ✅; **3-qism: indeks qachon ishlamaydi** qoldi)
-3. Oracle SQL type'lar: NUMBER, VARCHAR2, DATE
-4. Join'lar, turlari, qayerda qanday join
-5. ACID misollar bilan
-6. Tranzaksiya, sessiya
-7. COMMIT, ROLLBACK, SAVEPOINT
-8. Redo, UNDO log'lar
+2. ✅ Index, index turlari, qayerda qanday index → [11](11-indekslar.md)
+3. ✅ Oracle SQL type'lar: NUMBER, VARCHAR2, DATE → [12](12-type-lar.md)
+4. ✅ Join'lar, turlari, qayerda qanday join → [13](13-join-lar.md)
+5. ✅ ACID misollar bilan → [07](07-acid.md)
+6. ✅ Tranzaksiya, sessiya → [14](14-tranzaksiya-sessiya.md)
+7. ✅ COMMIT, ROLLBACK, SAVEPOINT → [15](15-commit-rollback-savepoint.md)
+8. 🟡 Redo, UNDO log'lar (asosi [07](07-acid.md) D qismida; keyingi)
 9. Deadlock
 10. Partition'lar
 
 ## Keyingi qadamlar
 
-**Shu yerda to'xtadik (2026-10-04):** indeks 3-qism (qachon ishlamaydi), keyin 3-mavzu: type'lar. Format: Claude bitta mavzuni tushuntiradi → men o'z so'zim bilan yozaman → baho.
+**Shu yerda to'xtadik (2026-10-04):** 15-dars (COMMIT, ROLLBACK, SAVEPOINT) tugadi; keyingisi 8-mavzu: Redo, UNDO, keyin Deadlock, Partition. 12–15-darslarning tekshiruv savollariga hali javob berilmagan. Format: Claude bitta mavzuni tushuntiradi → men o'z so'zim bilan yozaman → baho.
 
 1. [11-indekslar.md](11-indekslar.md) → 3-qism: indeks qachon ishlamaydi; javob berilmagan tekshiruv savollari
 2. ACID va "Tranzaksiya nima?" ga o'z so'zim bilan javob (mock 3-savol qayta)
