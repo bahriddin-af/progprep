@@ -29,7 +29,10 @@ Java: Tomcat · Servlet · JSP · sessions, application lifecycle
 | 13 | [13-join-lar.md](13-join-lar.md) | INNER, LEFT, RIGHT, FULL, CROSS, SELF, EXISTS, NOT IN tuzog'i | ✅ |
 | 14 | [14-tranzaksiya-sessiya.md](14-tranzaksiya-sessiya.md) | Sessiya, V$SESSION, tranzaksiya boshlanishi/tugashi, JDBC autocommit | ✅ |
 | 15 | [15-commit-rollback-savepoint.md](15-commit-rollback-savepoint.md) | COMMIT ichida, statement-level rollback, SAVEPOINT, qachon commit | ✅ |
-| — | [mock-intervyu.md](mock-intervyu.md) | Mock intervyu: savollar, ballar, qayerda to'xtadik | 🟡 |
+| 16 | [16-redo-undo.md](16-redo-undo.md) | UNDO va REDO: kassir daftarlari, ORA-01555, flashback | ✅ |
+| 17 | [17-deadlock.md](17-deadlock.md) | Deadlock: papkalar misoli, ORA-00060, ORDER BY ... FOR UPDATE | ✅ |
+| 18 | [18-partition.md](18-partition.md) | Partition: pruning, DROP PARTITION, turlari | ✅ |
+| — | [mock-intervyu.md](mock-intervyu.md) | Mock intervyu: 2-mock 10 savol, o'rtacha 5.4 → 8.1 | ✅ |
 
 ## Oracle SQL mavzular ro'yxati (bittadan o'tiladi)
 
@@ -40,17 +43,17 @@ Java: Tomcat · Servlet · JSP · sessions, application lifecycle
 5. ✅ ACID misollar bilan → [07](07-acid.md)
 6. ✅ Tranzaksiya, sessiya → [14](14-tranzaksiya-sessiya.md)
 7. ✅ COMMIT, ROLLBACK, SAVEPOINT → [15](15-commit-rollback-savepoint.md)
-8. 🟡 Redo, UNDO log'lar (asosi [07](07-acid.md) D qismida; keyingi)
-9. Deadlock
-10. Partition'lar
+8. ✅ Redo, UNDO log'lar → [16](16-redo-undo.md)
+9. ✅ Deadlock → [17](17-deadlock.md)
+10. ✅ Partition'lar → [18](18-partition.md)
 
 ## Keyingi qadamlar
 
-**Shu yerda to'xtadik (2026-10-04):** 15-dars (COMMIT, ROLLBACK, SAVEPOINT) tugadi; keyingisi 8-mavzu: Redo, UNDO, keyin Deadlock, Partition. 12–15-darslarning tekshiruv savollariga hali javob berilmagan. Format: Claude bitta mavzuni tushuntiradi → men o'z so'zim bilan yozaman → baho.
+**Shu yerda to'xtadik (2026-10-05, intervyu kuni):** 10 ta mavzu tugadi, 2-mock o'tkazildi ([natijalar](mock-intervyu.md)). Intervyudan oldin takrorlash: 5-savol (indeks turlari: Unique, Bitmap B-tree emas) va 7-savol (deadlock). Format: Claude bitta mavzuni tushuntiradi → men o'z so'zim bilan javob beraman → baho; bitta qisqa misol.
 
-1. [11-indekslar.md](11-indekslar.md) → 3-qism: indeks qachon ishlamaydi; javob berilmagan tekshiruv savollari
-2. ACID va "Tranzaksiya nima?" ga o'z so'zim bilan javob (mock 3-savol qayta)
-3. Mock intervyuni davom ettirish (3-savol: ACID, keyin indekslar, background jobs)
+1. Indeks turlarini va deadlock'ni bank misoli bilan ovoz chiqarib aytish
+2. [11-indekslar.md](11-indekslar.md) → 3-qism: indeks qachon ishlamaydi
+3. Java/HTTPS qismi ([08](08-tezkor-takrorlash.md)) mock'da hali sinalmagan
 4. Hali o'tilmagan: Transaction/Locking/**Deadlock**, SQL amaliyot (JOIN, analytic), Dynamic SQL, View/MView, normalizatsiya
 
 ## Dushanba ertalab o'qiladigan kartochka
